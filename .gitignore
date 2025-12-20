@@ -11,3 +11,6 @@ wheels/
 
 # GitHub Copilot instructions
 .github/copilot-instructions.md
+
+# Claude Code instructions
+CLAUDE.md
