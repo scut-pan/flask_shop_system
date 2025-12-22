@@ -6,7 +6,6 @@
 **技术栈**：Flask + MySQL + SQLAlchemy + Bootstrap + HTML/CSS
 **核心功能**：用户注册登录、商品展示、购物车、订单管理、管理员后台
 **开发时间**：建议4周完成
-**项目周期**：2025年1月 - 2025年2月
 
 ---
 
@@ -78,7 +77,7 @@ flask_shop_system/
 │   └── extensions.py          # Flask扩展初始化
 ├── migrations/                # 数据库迁移文件
 ├── config.py                  # 配置文件
-├── requirements.txt           # Python依赖
+├── pyproject.toml             # 项目配置和依赖管理
 ├── run.py                     # 应用启动文件
 ├── .env                       # 环境变量文件
 ├── .gitignore                 # Git忽略文件
@@ -148,7 +147,7 @@ sudo mysql_secure_installation
 mkdir flask_shop_system
 cd flask_shop_system
 
-# 使用uv初始化项目
+# 使用uv初始化项目（自动生成pyproject.toml）
 uv init
 
 # 创建必要的目录结构
@@ -184,27 +183,85 @@ touch .gitignore
 
 #### 步骤 1.3：配置项目依赖
 
-##### 1.3.1 创建 requirements.txt
-```txt
-Flask==2.3.3
-Flask-SQLAlchemy==3.0.5
-Flask-Login==0.6.2
-Flask-Mail==0.9.1
-Flask-Migrate==4.0.5
-Flask-WTF==1.1.1
-Werkzeug==2.3.7
-PyMySQL==1.1.0
-cryptography==41.0.4
-python-dotenv==1.0.0
-Pillow==10.0.1
-email-validator==2.0.0
-WTForms==3.0.1
+##### 1.3.1 配置 pyproject.toml
+
+编辑 `pyproject.toml` 文件，配置项目依赖：
+
+```toml
+[project]
+name = "flask-shop-system"
+version = "0.1.0"
+description = "基于Flask的在线购物网站"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "Flask==2.3.3",
+    "Flask-SQLAlchemy==3.0.5",
+    "Flask-Login==0.6.2",
+    "Flask-Mail==0.9.1",
+    "Flask-Migrate==4.0.5",
+    "Flask-WTF==1.1.1",
+    "Werkzeug==2.3.7",
+    "PyMySQL==1.1.0",
+    "cryptography==41.0.4",
+    "python-dotenv==1.0.0",
+    "Pillow==10.0.1",
+    "email-validator==2.0.0",
+    "WTForms==3.0.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-flask>=1.2.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+]
 ```
 
 ##### 1.3.2 安装依赖
 ```bash
-# 使用uv安装依赖（更快）
-uv pip install -r requirements.txt
+# 使用uv安装项目依赖（自动从pyproject.toml读取）
+uv sync
+
+# 或者逐个添加依赖
+uv add Flask Flask-SQLAlchemy Flask-Login Flask-Mail Flask-Migrate Flask-WTF
+uv add Werkzeug PyMySQL cryptography python-dotenv Pillow email-validator WTForms
+
+# 安装开发依赖
+uv add --dev pytest pytest-flask black flake8
+```
+
+##### 1.3.3 uv 常用命令说明
+
+```bash
+# 项目初始化
+uv init                          # 初始化新项目
+uv init flask-shop-system        # 指定项目名称
+
+# 依赖管理
+uv add flask                     # 添加依赖到 pyproject.toml
+uv add --dev pytest              # 添加开发依赖
+uv remove flask                  # 移除依赖
+uv sync                          # 同步安装所有依赖
+
+# 运行代码
+uv run python run.py             # 运行 Python 文件
+uv run flask run                 # 运行 Flask 命令
+
+# 脚本管理（可在 pyproject.toml 中定义）
+uv run init-db                   # 运行自定义脚本
+
+# 查看信息
+uv tree                          # 查看依赖树
+uv pip list                      # 列出已安装的包
 ```
 
 #### 步骤 1.4：配置Git版本控制
@@ -221,6 +278,10 @@ env/
 venv/
 ENV/
 .env
+
+# uv
+.venv/
+uv.lock
 
 # Flask
 instance/
@@ -1764,10 +1825,12 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
 
 ### 第1周测试项目
 - [ ] Python和MySQL安装成功
-- [ ] 项目目录结构创建完成
-- [ ] 所有依赖安装成功
+- [ ] uv包管理器安装成功
+- [ ] 项目初始化完成（uv init）
+- [ ] pyproject.toml配置正确
+- [ ] 依赖安装成功（uv sync）
 - [ ] 数据库创建成功
-- [ ] 基础Flask应用可以运行
+- [ ] 基础Flask应用可以运行（uv run python run.py）
 
 ### 第2周测试项目
 - [ ] 用户注册功能正常
@@ -1818,7 +1881,19 @@ git push
 git log --oneline
 ```
 
-### 3. 编写测试代码
+### 3. 现代Python项目管理
+```bash
+# 使用uv进行高效的依赖管理
+uv add package-name              # 添加新依赖
+uv sync                          # 同步依赖环境
+uv run python script.py          # 在虚拟环境中运行脚本
+
+# 保持pyproject.toml整洁
+# 定期更新依赖版本
+# 使用开发依赖进行代码质量检查
+```
+
+### 4. 编写测试代码
 ```python
 import pytest
 from app.models import User
@@ -1830,7 +1905,7 @@ def test_user_password():
     assert not user.check_password('wrong')
 ```
 
-### 4. 调试技巧
+### 5. 调试技巧
 ```python
 # 打印调试信息
 import logging
