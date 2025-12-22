@@ -183,63 +183,30 @@ touch .gitignore
 
 #### 步骤 1.3：配置项目依赖
 
-##### 1.3.1 配置 pyproject.toml
+使用 `uv add` 命令添加依赖，它会自动更新 `pyproject.toml` 和 `uv.lock` 文件：
 
-编辑 `pyproject.toml` 文件，配置项目依赖：
-
-```toml
-[project]
-name = "flask-shop-system"
-version = "0.1.0"
-description = "基于Flask的在线购物网站"
-authors = [
-    {name = "Your Name", email = "your.email@example.com"},
-]
-readme = "README.md"
-requires-python = ">=3.8"
-dependencies = [
-    "Flask==2.3.3",
-    "Flask-SQLAlchemy==3.0.5",
-    "Flask-Login==0.6.2",
-    "Flask-Mail==0.9.1",
-    "Flask-Migrate==4.0.5",
-    "Flask-WTF==1.1.1",
-    "Werkzeug==2.3.7",
-    "PyMySQL==1.1.0",
-    "cryptography==41.0.4",
-    "python-dotenv==1.0.0",
-    "Pillow==10.0.1",
-    "email-validator==2.0.0",
-    "WTForms==3.0.1",
-]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.uv]
-dev-dependencies = [
-    "pytest>=7.0.0",
-    "pytest-flask>=1.2.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
-]
-```
-
-##### 1.3.2 安装依赖
 ```bash
-# 使用uv安装项目依赖（自动从pyproject.toml读取）
-uv sync
-
-# 或者逐个添加依赖
+# 添加核心Flask依赖
 uv add Flask Flask-SQLAlchemy Flask-Login Flask-Mail Flask-Migrate Flask-WTF
 uv add Werkzeug PyMySQL cryptography python-dotenv Pillow email-validator WTForms
 
-# 安装开发依赖
+# 添加开发依赖
 uv add --dev pytest pytest-flask black flake8
+
+# 查看已安装的依赖
+uv tree
+
+# 同步安装所有依赖
+uv sync
 ```
 
-##### 1.3.3 uv 常用命令说明
+**说明**：
+- `uv add` 会自动将依赖添加到 `pyproject.toml` 的 `dependencies` 部分
+- `uv add --dev` 会将依赖添加到 `dev-dependencies` 部分
+- `uv.lock` 文件会自动更新，锁定具体的依赖版本
+- 无需手动编辑 `pyproject.toml` 文件
+
+##### 1.3.1 uv 常用命令说明
 
 ```bash
 # 项目初始化
