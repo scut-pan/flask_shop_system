@@ -78,7 +78,7 @@ flask_shop_system/
 ├── migrations/                # 数据库迁移文件
 ├── config.py                  # 配置文件
 ├── pyproject.toml             # 项目配置和依赖管理
-├── run.py                     # 应用启动文件
+├── main.py                    # 应用启动文件
 ├── .env                       # 环境变量文件
 ├── .gitignore                 # Git忽略文件
 └── README.md                  # 项目说明
@@ -176,7 +176,7 @@ touch app/utils/__init__.py
 touch app/utils/decorators.py
 touch app/utils/helpers.py
 touch config.py
-touch run.py
+touch main.py
 touch .env
 touch .gitignore
 ```
@@ -801,7 +801,7 @@ def register_template_context(app):
 
 ##### 2.4.2 编辑应用启动文件
 
-编辑 `run.py`：
+编辑 `main.py`：
 ```python
 import os
 from app import create_app

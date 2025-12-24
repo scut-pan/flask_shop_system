@@ -84,7 +84,7 @@ uv run flask init-db
 ### 6. 运行项目
 
 ```bash
-uv run python run.py
+uv run python main.py
 ```
 
 访问 http://localhost:5000
