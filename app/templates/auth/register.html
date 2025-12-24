@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}注册 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> 用户注册
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- 用户名 -->
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control") }}
+                        <div class="form-text">4-20个字符，支持字母、数字和下划线</div>
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 邮箱 -->
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 密码 -->
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control", id="password") }}
+                        <div class="form-text">至少6个字符</div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 确认密码 -->
+                    <div class="mb-3">
+                        {{ form.password2.label(class="form-label") }}
+                        {{ form.password2(class="form-control", id="password2") }}
+                        {% if form.password2.errors %}
+                            {% for error in form.password2.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    已有账号？
+                    <a href="{{ url_for('auth.login') }}">立即登录</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 实时检查密码确认
+document.getElementById('password2').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const password2 = this.value;
+
+    if (password2 && password !== password2) {
+        this.setCustomValidity('两次输入的密码不一致');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}
