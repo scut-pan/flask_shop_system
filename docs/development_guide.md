@@ -430,7 +430,7 @@ def init_extensions(app):
 
 编辑 `app/models/user.py`：
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -444,8 +444,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # 关系定义
     orders = db.relationship('Order', backref='user', lazy='dynamic', cascade='all, delete-orphan')
@@ -478,7 +478,7 @@ class User(UserMixin, db.Model):
 
 编辑 `app/models/product.py`：
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
 from app.extensions import db
 
 class Product(db.Model):
@@ -491,8 +491,8 @@ class Product(db.Model):
     stock = db.Column(db.Integer, default=0)
     image_url = db.Column(db.String(300))
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # 关系定义
     cart_items = db.relationship('CartItem', backref='product', lazy='dynamic', cascade='all, delete-orphan')
@@ -524,7 +524,7 @@ class Product(db.Model):
 
 编辑 `app/models/cart.py`：
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
 from app.extensions import db
 
 class CartItem(db.Model):
@@ -534,7 +534,7 @@ class CartItem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     quantity = db.Column(db.Integer, default=1)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # 创建唯一约束，防止重复添加
     __table_args__ = (db.UniqueConstraint('user_id', 'product_id', name='unique_user_product'),)
@@ -560,7 +560,7 @@ class CartItem(db.Model):
 
 编辑 `app/models/order.py`：
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
 from app.extensions import db
 import uuid
 
@@ -574,8 +574,8 @@ class Order(db.Model):
     status = db.Column(db.Enum('pending', 'paid', 'shipped', 'delivered', 'cancelled',
                             name='order_status'), default='pending')
     shipping_address = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # 关系定义
     items = db.relationship('OrderItem', backref='order', lazy='dynamic', cascade='all, delete-orphan')
