@@ -285,6 +285,7 @@ touch app/static/images/uploads/.gitkeep
 #### 步骤 1.5：创建数据库
 
 使用MySQL命令行创建数据库：
+
 ```sql
 -- 登录MySQL
 mysql -u root -p
@@ -292,11 +293,19 @@ mysql -u root -p
 -- 创建数据库
 CREATE DATABASE shop_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- 创建专用用户（可选）
-CREATE USER 'shop_user'@'localhost' IDENTIFIED BY 'your_password';
+-- 创建专用用户（推荐）
+CREATE USER 'shop_user'@'localhost' IDENTIFIED BY 'ShopPass456@secure';
 GRANT ALL PRIVILEGES ON shop_db.* TO 'shop_user'@'localhost';
 FLUSH PRIVILEGES;
+
+-- 退出
+EXIT;
 ```
+
+**注意**：
+- 将 `ShopPass456@secure` 替换为你自己的密码
+- 创建专用用户比直接使用 root 更安全
+- 记住这个密码，后面配置 `.env` 时会用到
 
 ---
 
@@ -701,23 +710,35 @@ config = {
 
 ##### 2.3.2 创建环境变量文件
 
-创建 `.env` 文件（不要提交到Git）：
+**重要提示**：`.env` 文件包含敏感信息，已配置在 `.gitignore` 中，不会提交到 Git。
+
+创建 `.env` 文件（复制示例文件）：
+```bash
+cp .env.example .env
+```
+
+编辑 `.env` 文件，填入真实配置：
 ```env
 # Flask配置
-FLASK_APP=run.py
-FLASK_ENV=development
 SECRET_KEY=your-super-secret-key-here
 
 # 数据库配置
-DATABASE_URL=mysql+pymysql://username:password@localhost/shop_db
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=shop_user
+MYSQL_PASSWORD=ShopPass456@secure
+MYSQL_DB=shop_db
+MYSQL_CHARSET=utf8mb4
 
-# 邮件配置
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=true
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
+# 环境标识
+FLASK_ENV=development
+FLASK_DEBUG=1
 ```
+
+**说明**：
+- 将 `ShopPass456@secure` 替换为你在步骤 1.5 中设置的密码
+- 将 `your-super-secret-key-here` 替换为一个随机字符串
+- `.env` 文件不会被提交到 Git，所以可以安全地存储密码
 
 #### 步骤 2.4：创建Flask应用工厂
 
