@@ -1421,6 +1421,1002 @@ document.getElementById('password2').addEventListener('input', function() {
 {% endblock %}
 ```
 
+##### 3.3.4 创建个人中心页面
+
+创建 `app/templates/auth/profile.html`：
+```html
+{% extends "base.html" %}
+
+{% block title %}个人中心 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h5>{{ current_user.username }}</h5>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    {% if current_user.is_admin %}
+                    <span class="badge bg-danger">管理员</span>
+                    {% else %}
+                    <span class="badge bg-primary">普通用户</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> 个人信息
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td width="30%"><strong>用户名:</strong></td>
+                            <td>{{ current_user.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>邮箱:</strong></td>
+                            <td>{{ current_user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>注册时间:</strong></td>
+                            <td>{{ current_user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>账户类型:</strong></td>
+                            <td>
+                                {% if current_user.is_admin %}
+                                <span class="badge bg-danger">管理员</span>
+                                {% else %}
+                                <span class="badge bg-primary">普通用户</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+
+                    <hr>
+
+                    <h6>快速操作</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-edit"></i> 编辑资料
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-key"></i> 修改密码
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('order.orders') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-list"></i> 我的订单
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> 购物车概览
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if cart_count > 0 %}
+                    <p>您的购物车中有 <strong>{{ cart_count }}</strong> 件商品</p>
+                    <a href="{{ url_for('cart.index') }}" class="btn btn-primary">
+                        查看购物车
+                    </a>
+                    {% else %}
+                    <p class="text-muted">您的购物车是空的</p>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-primary">
+                        去逛逛
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
+
+##### 3.3.5 创建编辑个人信息页面
+
+创建 `app/templates/auth/edit_profile.html`：
+```html
+{% extends "base.html" %}
+
+{% block title %}编辑资料 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> 编辑个人信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- 用户名（只读） -->
+                    <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" value="{{ current_user.username }}" readonly>
+                        <div class="form-text">用户名不能修改</div>
+                    </div>
+
+                    <!-- 邮箱 -->
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">取消</a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
+
+##### 3.3.6 创建修改密码页面
+
+创建 `app/templates/auth/change_password.html`：
+```html
+{% extends "base.html" %}
+
+{% block title %}修改密码 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-key"></i> 修改密码
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- 当前密码 -->
+                    <div class="mb-3">
+                        {{ form.old_password.label(class="form-label") }}
+                        {{ form.old_password(class="form-control") }}
+                        {% if form.old_password.errors %}
+                            {% for error in form.old_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 新密码 -->
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control", id="password") }}
+                        <div class="form-text">至少6个字符</div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 确认新密码 -->
+                    <div class="mb-3">
+                        {{ form.password2.label(class="form-label") }}
+                        {{ form.password2(class="form-control", id="password2") }}
+                        {% if form.password2.errors %}
+                            {% for error in form.password2.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 提示信息 -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        修改密码后需要重新登录
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">取消</a>
+                        {{ form.submit(class="btn btn-warning") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 实时检查密码确认
+document.getElementById('password2').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const password2 = this.value;
+
+    if (password2 && password !== password2) {
+        this.setCustomValidity('两次输入的密码不一致');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}
+```
+
+#### 步骤 3.4：创建主路由和主页
+
+##### 3.4.1 实现主路由
+
+编辑 `app/routes/main.py`：
+```python
+from flask import Blueprint, render_template
+
+main_bp = Blueprint('main', __name__)
+
+@main_bp.route('/')
+def index():
+    """网站首页"""
+    return render_template('main/index.html')
+
+@main_bp.route('/about')
+def about():
+    """关于我们页面"""
+    return render_template('main/about.html')
+```
+
+##### 3.4.2 更新路由初始化文件
+
+编辑 `app/routes/__init__.py`：
+```python
+from app.routes import auth, main, product, cart, order, admin
+
+# 创建蓝图实例
+auth_bp = auth.auth_bp
+main_bp = main.main_bp
+product_bp = product.product_bp
+cart_bp = cart.cart_bp
+order_bp = order.order_bp
+admin_bp = admin.admin_bp
+
+__all__ = ['auth_bp', 'main_bp', 'product_bp', 'cart_bp', 'order_bp', 'admin_bp']
+```
+
+##### 3.4.3 创建首页模板
+
+创建 `app/templates/main/index.html`：
+```html
+{% extends "base.html" %}
+
+{% block title %}首页 - Flask购物网站{% endblock %}
+
+{% block content %}
+<!-- 首页轮播图 -->
+<div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="hero-slide bg-primary text-white text-center py-5">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">欢迎来到我们的购物网站</h1>
+                    <p class="lead">发现优质商品，享受便捷购物</p>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-light btn-lg">立即选购</a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide bg-success text-white text-center py-5">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">新品上市</h1>
+                    <p class="lead">精选商品，限时优惠</p>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-light btn-lg">查看详情</a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide bg-info text-white text-center py-5">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">会员专享</h1>
+                    <p class="lead">注册会员，享受更多优惠</p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('product.list') }}" class="btn btn-light btn-lg">开始购物</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">立即注册</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<!-- 特色区域 -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">快速配送</h5>
+                    <p class="card-text">全国范围内快速配送，让您尽快收到心仪商品</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">安全支付</h5>
+                    <p class="card-text">多种支付方式，保障您的交易安全</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">贴心服务</h5>
+                    <p class="card-text">专业的客服团队，随时为您解答疑问</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 购物指南 -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">购物流程</h2>
+        <div class="row">
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">1</span>
+                </div>
+                <h5>浏览商品</h5>
+                <p class="text-muted">浏览我们的商品目录，选择您喜欢的商品</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">2</span>
+                </div>
+                <h5>加入购物车</h5>
+                <p class="text-muted">将商品添加到购物车，方便统一结算</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-info text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">3</span>
+                </div>
+                <h5>提交订单</h5>
+                <p class="text-muted">填写收货地址，确认订单信息</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-warning text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">4</span>
+                </div>
+                <h5>收货评价</h5>
+                <p class="text-muted">等待收货，确认并评价商品</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
+
+#### 步骤 3.5：创建自定义样式文件
+
+##### 3.5.1 创建自定义CSS
+
+创建 `app/static/css/style.css`：
+```css
+/* 全局样式 */
+body {
+    font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* 导航栏样式 */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* 卡片阴影效果 */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* 商品卡片样式 */
+.product-card {
+    height: 100%;
+}
+
+.product-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-card .price {
+    font-size: 1.5rem;
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.product-card .original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 5px;
+    padding: 8px 20px;
+    font-weight: 500;
+}
+
+/* 购物车徽章 */
+.badge {
+    font-size: 0.75rem;
+}
+
+/* 表单样式 */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* 首页轮播图 */
+.hero-slide {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-item {
+    transition: transform 0.6s ease-in-out;
+}
+
+/* 步骤圆圈 */
+.step-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+/* 分页样式 */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    color: #0d6efd;
+}
+
+.page-link:hover {
+    color: #0a58ca;
+    background-color: #e9ecef;
+}
+
+/* 订单状态标签 */
+.order-status {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+/* 页脚样式 */
+footer {
+    margin-top: auto;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .hero-slide {
+        min-height: 300px;
+    }
+
+    .hero-slide h1 {
+        font-size: 2rem;
+    }
+
+    .product-card .card-img-top {
+        height: 150px;
+    }
+}
+
+/* 加载动画 */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 消息提示动画 */
+.alert {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 表格样式 */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+}
+
+/* 数量选择器 */
+.quantity-selector {
+    display: inline-flex;
+    align-items: center;
+}
+
+.quantity-selector button {
+    width: 35px;
+    height: 35px;
+    padding: 0;
+}
+
+.quantity-selector input {
+    width: 60px;
+    text-align: center;
+    border-left: none;
+    border-right: none;
+}
+```
+
+#### 步骤 3.6：创建自定义JavaScript文件
+
+##### 3.6.1 创建主JS文件
+
+创建 `app/static/js/main.js`：
+```javascript
+// 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    // 自动隐藏提示消息
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+
+    // 确认删除操作
+    const deleteButtons = document.querySelectorAll('[data-confirm]');
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            const message = this.getAttribute('data-confirm');
+            if (!confirm(message)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // 数量选择器
+    const quantitySelectors = document.querySelectorAll('.quantity-selector');
+    quantitySelectors.forEach(function(selector) {
+        const minusBtn = selector.querySelector('.btn-minus');
+        const plusBtn = selector.querySelector('.btn-plus');
+        const input = selector.querySelector('input');
+
+        if (minusBtn && plusBtn && input) {
+            minusBtn.addEventListener('click', function() {
+                let value = parseInt(input.value) || 1;
+                if (value > 1) {
+                    input.value = value - 1;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+
+            plusBtn.addEventListener('click', function() {
+                let value = parseInt(input.value) || 1;
+                const max = parseInt(input.getAttribute('max')) || 99;
+                if (value < max) {
+                    input.value = value + 1;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+    });
+});
+
+// 工具函数：格式化货币
+function formatCurrency(amount) {
+    return '¥' + parseFloat(amount).toFixed(2);
+}
+
+// 工具函数：显示提示消息
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertBefore(alertDiv, container.firstChild);
+
+        setTimeout(function() {
+            alertDiv.style.opacity = '0';
+            setTimeout(function() {
+                alertDiv.remove();
+            }, 300);
+        }, 5000);
+    }
+}
+
+// 工具函数：复制到剪贴板
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            showAlert('已复制到剪贴板', 'success');
+        }).catch(function() {
+            showAlert('复制失败', 'danger');
+        });
+    } else {
+        // 兼容旧浏览器
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showAlert('已复制到剪贴板', 'success');
+    }
+}
+
+// 图片懒加载
+if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove('lazy');
+                observer.unobserve(img);
+            }
+        });
+    });
+
+    const lazyImages = document.querySelectorAll('img.lazy');
+    lazyImages.forEach(function(img) {
+        imageObserver.observe(img);
+    });
+}
+
+// 返回顶部按钮
+const backToTopButton = document.createElement('button');
+backToTopButton.className = 'btn btn-primary position-fixed bottom-0 end-0 m-4';
+backToTopButton.style.cssText = 'z-index: 1000; display: none;';
+backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+backToTopButton.setAttribute('aria-label', '返回顶部');
+document.body.appendChild(backToTopButton);
+
+window.addEventListener('scroll', function() {
+    if (window.pageYOffset > 300) {
+        backToTopButton.style.display = 'block';
+    } else {
+        backToTopButton.style.display = 'none';
+    }
+});
+
+backToTopButton.addEventListener('click', function() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+});
+```
+
+#### 步骤 3.7：配置登录管理器
+
+##### 3.7.1 更新扩展初始化文件
+
+编辑 `app/extensions.py`，添加用户加载器：
+```python
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask_migrate import Migrate
+
+# 初始化扩展
+db = SQLAlchemy()
+login_manager = LoginManager()
+mail = Mail()
+migrate = Migrate()
+
+def init_extensions(app):
+    """初始化所有扩展"""
+    db.init_app(app)
+    login_manager.init_app(app)
+    mail.init_app(app)
+    migrate.init_app(app, db)
+
+    # 配置登录管理器
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = '请先登录访问此页面'
+    login_manager.login_message_category = 'info'
+
+    # 用户加载器
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.models import User
+        return User.query.get(int(user_id))
+```
+
+#### 步骤 3.8：初始化数据库和测试
+
+##### 3.8.1 创建数据库初始化脚本
+
+创建 `init_db.py`：
+```python
+"""数据库初始化脚本"""
+from app import create_app
+from app.extensions import db
+from app.models import User
+
+def init_database():
+    """初始化数据库"""
+    app = create_app()
+
+    with app.app_context():
+        # 创建所有表
+        db.create_all()
+
+        # 创建管理员用户（如果不存在）
+        admin = User.query.filter_by(username='admin').first()
+        if not admin:
+            admin = User(
+                username='admin',
+                email='admin@shop.com',
+                is_admin=True
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print('✓ 管理员用户创建成功')
+            print('  用户名: admin')
+            print('  密码: admin123')
+            print('  邮箱: admin@shop.com')
+        else:
+            print('✓ 管理员用户已存在')
+
+        # 创建测试用户（如果不存在）
+        test_user = User.query.filter_by(username='test').first()
+        if not test_user:
+            test_user = User(
+                username='test',
+                email='test@example.com',
+                is_admin=False
+            )
+            test_user.set_password('test123')
+            db.session.add(test_user)
+            db.session.commit()
+            print('✓ 测试用户创建成功')
+            print('  用户名: test')
+            print('  密码: test123')
+            print('  邮箱: test@example.com')
+        else:
+            print('✓ 测试用户已存在')
+
+        print('\n数据库初始化完成！')
+
+if __name__ == '__main__':
+    init_database()
+```
+
+##### 3.8.2 初始化数据库
+
+在项目根目录执行：
+```bash
+# 使用uv运行初始化脚本
+uv run python init_db.py
+```
+
+**输出示例**：
+```
+✓ 管理员用户创建成功
+  用户名: admin
+  密码: admin123
+  邮箱: admin@shop.com
+✓ 测试用户创建成功
+  用户名: test
+  密码: test123
+  邮箱: test@example.com
+
+数据库初始化完成！
+```
+
+##### 3.8.3 启动应用
+
+```bash
+# 使用uv运行Flask应用
+uv run python main.py
+```
+
+**输出示例**：
+```
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.100:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+```
+
+##### 3.8.4 测试用户认证系统
+
+**测试清单**：
+
+1. **访问首页**
+   - 打开浏览器访问：http://127.0.0.1:5000
+   - 检查首页是否正常显示
+
+2. **测试注册功能**
+   - 访问：http://127.0.0.1:5000/auth/register
+   - 填写注册表单：
+     - 用户名：newuser
+     - 邮箱：newuser@example.com
+     - 密码：password123
+     - 确认密码：password123
+   - 点击"注册"按钮
+   - 检查是否显示"注册成功！请登录"提示
+
+3. **测试登录功能**
+   - 使用测试账号登录：
+     - 用户名：test
+     - 密码：test123
+   - 勾选"记住我"
+   - 点击"登录"按钮
+   - 检查是否显示"欢迎回来，test！"提示
+   - 检查导航栏是否显示用户名和购物车图标
+
+4. **测试个人中心**
+   - 访问：http://127.0.0.1:5000/auth/profile
+   - 检查个人信息是否正确显示
+   - 点击"编辑资料"按钮
+   - 修改邮箱地址
+   - 保存更改
+
+5. **测试修改密码**
+   - 在个人中心点击"修改密码"
+   - 填写表单：
+     - 当前密码：test123
+     - 新密码：newpass123
+     - 确认新密码：newpass123
+   - 点击"修改密码"按钮
+   - 检查是否自动退出登录
+   - 使用新密码重新登录
+
+6. **测试登出功能**
+   - 点击导航栏的用户菜单
+   - 选择"退出登录"
+   - 检查是否显示"您已成功退出登录"提示
+   - 检查导航栏是否显示"登录"和"注册"链接
+
+7. **测试管理员权限**
+   - 使用管理员账号登录：
+     - 用户名：admin
+     - 密码：admin123
+   - 检查个人中心是否显示"管理员"徽章
+   - 检查导航栏用户菜单中是否显示"管理后台"链接
+
+8. **测试表单验证**
+   - 尝试使用已存在的用户名注册
+   - 检查是否显示"用户名已存在"错误
+   - 尝试使用错误的密码登录
+   - 检查是否显示"用户名或密码错误"提示
+   - 尝试在未登录时访问需要认证的页面
+   - 检查是否重定向到登录页
+
+9. **测试密码可见性切换**
+   - 在登录页面点击密码框旁的眼睛图标
+   - 检查密码是否可见/隐藏
+
+10. **测试会话持久性**
+    - 登录后关闭浏览器
+    - 重新打开浏览器访问网站
+    - 检查是否仍然保持登录状态（如果勾选了"记住我"）
+
+##### 3.8.5 数据库验证
+
+使用MySQL命令行查看数据：
+```sql
+-- 登录MySQL
+mysql -u shop_user -p shop_db
+
+-- 查看用户表
+SELECT id, username, email, is_admin, created_at FROM users;
+
+-- 预期输出示例：
+-- +----+----------+------------------+----------+---------------------+
+-- | id | username | email            | is_admin | created_at          |
+-- +----+----------+------------------+----------+---------------------+
+-- |  1 | admin    | admin@shop.com   |        1 | 2025-12-25 10:00:00 |
+-- |  2 | test     | test@example.com |        0 | 2025-12-25 10:00:00 |
+-- |  3 | newuser  | newuser@example.com | 0 | 2025-12-25 10:05:00 |
+-- +----+----------+------------------+----------+---------------------+
+
+-- 退出
+EXIT;
+```
+
 ---
 
 ## 🔧 常用Python语法和技巧

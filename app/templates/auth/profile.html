@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}个人中心 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user-circle fa-5x text-primary"></i>
+                    </div>
+                    <h5>{{ current_user.username }}</h5>
+                    <p class="text-muted">{{ current_user.email }}</p>
+                    {% if current_user.is_admin %}
+                    <span class="badge bg-danger">管理员</span>
+                    {% else %}
+                    <span class="badge bg-primary">普通用户</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> 个人信息
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td width="30%"><strong>用户名:</strong></td>
+                            <td>{{ current_user.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>邮箱:</strong></td>
+                            <td>{{ current_user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>注册时间:</strong></td>
+                            <td>{{ current_user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>账户类型:</strong></td>
+                            <td>
+                                {% if current_user.is_admin %}
+                                <span class="badge bg-danger">管理员</span>
+                                {% else %}
+                                <span class="badge bg-primary">普通用户</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+
+                    <hr>
+
+                    <h6>快速操作</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-edit"></i> 编辑资料
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-key"></i> 修改密码
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('order.orders') }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-list"></i> 我的订单
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> 购物车概览
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if cart_count > 0 %}
+                    <p>您的购物车中有 <strong>{{ cart_count }}</strong> 件商品</p>
+                    <a href="{{ url_for('cart.index') }}" class="btn btn-primary">
+                        查看购物车
+                    </a>
+                    {% else %}
+                    <p class="text-muted">您的购物车是空的</p>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-primary">
+                        去逛逛
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
