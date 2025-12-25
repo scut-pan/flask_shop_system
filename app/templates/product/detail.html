@@ -62,23 +62,9 @@
             <div class="d-grid gap-2">
                 {% if product.is_active and product.stock > 0 %}
                     {% if current_user.is_authenticated %}
-                    <form method="POST" action="{{ url_for('cart.add', product_id=product.id) }}">
+                    <form method="POST" action="{{ url_for('cart.add') }}">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="row g-2 mb-3">
-                            <div class="col-auto">
-                                <label for="quantity" class="col-form-label">数量:</label>
-                            </div>
-                            <div class="col-auto">
-                                <input type="number"
-                                       class="form-control"
-                                       name="quantity"
-                                       id="quantity"
-                                       value="1"
-                                       min="1"
-                                       max="{{ product.stock }}"
-                                       style="width: 100px;">
-                            </div>
-                        </div>
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-cart-plus"></i> 加入购物车
                         </button>
