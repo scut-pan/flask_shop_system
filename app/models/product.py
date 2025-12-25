@@ -29,12 +29,11 @@ class Product(db.Model):
         return self.stock >= quantity
 
     def reduce_stock(self, quantity):
-        """减少库存"""
+        """减少库存（不自动提交，由调用者控制事务）"""
         if self.is_in_stock(quantity):
             self.stock -= quantity
-            db.session.commit()
             return True
-        return False
+        raise ValueError(f"库存不足: 需要 {quantity}，当前库存 {self.stock}")
 
     def get_image_url(self):
         """获取图片URL，如果没有则返回默认图片"""
