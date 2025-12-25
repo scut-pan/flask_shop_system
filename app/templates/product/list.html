@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}商品列表 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 页面标题 -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>
+                {% if search_query %}
+                    搜索结果: "{{ search_query }}"
+                {% else %}
+                    商品列表
+                {% endif %}
+            </h2>
+        </div>
+    </div>
+
+    <!-- 商品网格 -->
+    {% if products %}
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 product-card">
+                <a href="{{ url_for('product.detail', product_id=product.id) }}" class="text-decoration-none">
+                    <img src="{{ product.get_image_url() }}"
+                         class="card-img-top product-image"
+                         alt="{{ product.name }}"
+                         onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'; event.stopPropagation();">
+                </a>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <a href="{{ url_for('product.detail', product_id=product.id) }}"
+                           class="text-decoration-none text-dark">
+                            {{ product.name }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted small flex-grow-1">
+                        {% if product.description %}
+                            {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                        {% else %}
+                            暂无描述
+                        {% endif %}
+                    </p>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 text-danger mb-0">¥{{ product.price }}</span>
+                            <small class="text-muted">
+                                {% if product.stock > 0 %}
+                                    库存: {{ product.stock }}
+                                {% else %}
+                                    <span class="text-danger">缺货</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% if current_user.is_authenticated and product.stock > 0 %}
+                        <div class="mt-2">
+                            <a href="{{ url_for('cart.add', product_id=product.id) }}"
+                               class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-cart-plus"></i> 加入购物车
+                            </a>
+                        </div>
+                        {% elif not current_user.is_authenticated %}
+                        <div class="mt-2">
+                            <a href="{{ url_for('auth.login') }}"
+                               class="btn btn-outline-primary btn-sm w-100">
+                                登录后购买
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 分页导航 -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="商品分页">
+        <ul class="pagination justify-content-center">
+            <!-- 上一页 -->
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('product.list', page=pagination.prev_num, q=search_query) }}">
+                    上一页
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">上一页</span>
+            </li>
+            {% endif %}
+
+            <!-- 页码 -->
+            {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="{{ url_for('product.list', page=page_num, q=search_query) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            <!-- 下一页 -->
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="{{ url_for('product.list', page=pagination.next_num, q=search_query) }}">
+                    下一页
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">下一页</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- 没有商品 -->
+    <div class="text-center py-5">
+        <i class="fas fa-box-open fa-5x text-muted mb-3"></i>
+        <h3 class="text-muted">
+            {% if search_query %}
+                没有找到匹配 "{{ search_query }}" 的商品
+            {% else %}
+                暂无商品
+            {% endif %}
+        </h3>
+        {% if search_query %}
+        <a href="{{ url_for('product.list') }}" class="btn btn-primary mt-3">
+            查看所有商品
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.product-image {
+    height: 200px;
+    object-fit: cover;
+}
+.product-card .card-img-top {
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
+}
+</style>
+{% endblock %}
