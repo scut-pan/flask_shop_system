@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}确认订单 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- 订单商品列表 -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-bag"></i> 订单商品
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="50%">商品</th>
+                                    <th width="15%">单价</th>
+                                    <th width="15%">数量</th>
+                                    <th width="15%">小计</th>
+                                    <th width="5%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                <tr>
+                                    <!-- 商品信息 -->
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.image_url %}
+                                            <img src="{{ item.product.image_url }}"
+                                                 alt="{{ item.product.name }}"
+                                                 class="rounded me-3"
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="rounded me-3 bg-secondary d-flex align-items-center justify-content-center"
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="fas fa-image text-white"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-1">{{ item.product.name }}</h6>
+                                                <small class="text-muted">{{ item.product.description[:50] }}...</small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- 单价 -->
+                                    <td>
+                                        <span class="text-danger fw-bold">¥{{ "%.2f"|format(item.product.price) }}</span>
+                                    </td>
+
+                                    <!-- 数量 -->
+                                    <td>
+                                        <span class="badge bg-secondary">x {{ item.quantity }}</span>
+                                    </td>
+
+                                    <!-- 小计 -->
+                                    <td>
+                                        <span class="text-danger fw-bold">¥{{ "%.2f"|format(item.get_subtotal()) }}</span>
+                                    </td>
+
+                                    <!-- 空列 -->
+                                    <td></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 收货信息表单 -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-truck"></i> 收货信息
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.recipient_name.label(class="form-label") }}
+                                {{ form.recipient_name(class="form-control", placeholder="请输入收货人姓名") }}
+                                {% if form.recipient_name.errors %}
+                                    {% for error in form.recipient_name.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.contact_phone.label(class="form-label") }}
+                                {{ form.contact_phone(class="form-control", placeholder="请输入11位手机号码") }}
+                                {% if form.contact_phone.errors %}
+                                    {% for error in form.contact_phone.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.shipping_address.label(class="form-label") }}
+                            {{ form.shipping_address(class="form-control", rows="3", placeholder="请输入详细的收货地址") }}
+                            {% if form.shipping_address.errors %}
+                                {% for error in form.shipping_address.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 请仔细核对收货信息，确保商品能准确送达
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> 提交订单
+                            </button>
+                            <a href="{{ url_for('cart.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回购物车
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单摘要 -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt"></i> 订单摘要
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>商品件数:</span>
+                        <span>{{ cart_items|length }} 件</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>商品总价:</span>
+                        <span>¥{{ "%.2f"|format(total_amount) }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fs-5 fw-bold">应付总额:</span>
+                        <span class="fs-5 fw-bold text-danger">¥{{ "%.2f"|format(total_amount) }}</span>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <i class="fas fa-shield-alt"></i> 保障说明
+                        <hr class="my-2">
+                        <ul class="small mb-0">
+                            <li>7天无理由退货</li>
+                            <li>正品保障</li>
+                            <li>先行赔付</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 温馨提示 -->
+            <div class="card mt-3">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> 温馨提示
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li>提交订单后商品将保留24小时</li>
+                        <li>请在24小时内完成支付</li>
+                        <li>订单提交后库存将被锁定</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
