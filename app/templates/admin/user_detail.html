@@ -1,0 +1,135 @@
+{% extends "admin/base.html" %}
+
+{% block title %}用户详情 - 管理后台{% endblock %}
+
+{% block page_title %}用户详情{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- 用户信息 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">用户信息</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th class="col-3">用户名:</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>邮箱:</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>角色:</th>
+                        <td>
+                            {% if user.is_admin %}
+                                <span class="badge bg-danger">管理员</span>
+                            {% else %}
+                                <span class="badge bg-secondary">普通用户</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>状态:</th>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">正常</span>
+                            {% else %}
+                                <span class="badge bg-secondary">已禁用</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>注册时间:</th>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    <tr>
+                        <th>订单统计:</th>
+                        <td>
+                            共 <strong>{{ total_orders }}</strong> 个订单,
+                            消费 <strong class="text-success">¥{{ "%.2f"|format(total_spent) }}</strong>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 用户订单列表 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">用户订单</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>订单号</th>
+                                <th>金额</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if user.orders.all() %}
+                                {% for order in user.orders.limit(10).all() %}
+                                <tr>
+                                    <td><code>{{ order.order_number }}</code></td>
+                                    <td>¥{{ "%.2f"|format(order.total_amount) }}</td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                            <span class="badge bg-warning">待支付</span>
+                                        {% elif order.status == 'paid' %}
+                                            <span class="badge bg-info">已支付</span>
+                                        {% elif order.status == 'shipped' %}
+                                            <span class="badge bg-primary">已发货</span>
+                                        {% elif order.status == 'delivered' %}
+                                            <span class="badge bg-success">已完成</span>
+                                        {% elif order.status == 'cancelled' %}
+                                            <span class="badge bg-danger">已取消</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.order_detail', order_id=order.id) }}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            查看
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">暂无订单</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- 操作 -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">操作</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <a href="{{ url_for('admin.user_edit', user_id=user.id) }}"
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i> 编辑用户
+                </a>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

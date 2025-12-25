@@ -1,0 +1,90 @@
+{% extends "admin/base.html" %}
+
+{% block title %}编辑用户 - 管理后台{% endblock %}
+
+{% block page_title %}编辑用户{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control") }}
+                        {% if form.username.errors %}
+                            <div class="text-danger">
+                                {% for error in form.username.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                        {% if form.email.errors %}
+                            <div class="text-danger">
+                                {% for error in form.email.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.is_admin(class="form-check-input") }}
+                        {{ form.is_admin.label(class="form-check-label") }}
+                        <div class="form-text">
+                            管理员拥有访问管理后台的权限
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.is_active(class="form-check-input") }}
+                        {{ form.is_active.label(class="form-check-label") }}
+                        <div class="form-text">
+                            禁用后用户将无法登录系统
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.user_detail', user_id=user.id) }}"
+                           class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">用户统计</div>
+            <div class="card-body">
+                <h6>基本信息</h6>
+                <ul class="list-unstyled">
+                    <li><strong>用户ID:</strong> {{ user.id }}</li>
+                    <li><strong>注册时间:</strong> {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                    <li><strong>最后更新:</strong> {{ user.updated_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                </ul>
+
+                <hr>
+
+                <h6>订单统计</h6>
+                <ul class="list-unstyled">
+                    <li><strong>订单总数:</strong> {{ user.orders.count() }}</li>
+                    <li><strong>待支付:</strong> {{ user.orders.filter_by(status='pending').count() }}</li>
+                    <li><strong>已完成:</strong> {{ user.orders.filter_by(status='delivered').count() }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

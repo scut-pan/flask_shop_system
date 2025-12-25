@@ -1,0 +1,142 @@
+{% extends "admin/base.html" %}
+
+{% block title %}销售统计 - 管理后台{% endblock %}
+
+{% block page_title %}销售统计{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- 销售趋势图 -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">最近30天销售趋势</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="salesChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单状态分布 -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">订单状态分布</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 商品销量排行 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">商品销量排行 (Top 10)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>商品名称</th>
+                        <th class="text-center">销量</th>
+                        <th class="text-end">销售金额</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if product_sales %}
+                        {% for item in product_sales %}
+                        <tr>
+                            <td><span class="badge bg-primary">{{ loop.index }}</span></td>
+                            <td>{{ item[0] }}</td>
+                            <td class="text-center">{{ item[1] }}</td>
+                            <td class="text-end">¥{{ "%.2f"|format(item[2]) }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">暂无销售数据</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 销售趋势图
+const salesCtx = document.getElementById('salesChart').getContext('2d');
+new Chart(salesCtx, {
+    type: 'line',
+    data: {
+        labels: {{ dates | tojson }},
+        datasets: [{
+            label: '销售额 (元)',
+            data: {{ sales | tojson }},
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// 订单状态分布图
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+const statusLabels = {
+    'pending': '待支付',
+    'paid': '已支付',
+    'shipped': '已发货',
+    'delivered': '已完成',
+    'cancelled': '已取消'
+};
+
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys({{ status_data | tojson }}).map(key => statusLabels[key]),
+        datasets: [{
+            data: Object.values({{ status_data | tojson }}),
+            backgroundColor: [
+                'rgb(255, 193, 7)',
+                'rgb(13, 202, 240)',
+                'rgb(13, 110, 253)',
+                'rgb(25, 135, 84)',
+                'rgb(220, 53, 69)'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
