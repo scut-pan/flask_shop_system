@@ -56,3 +56,26 @@ class PasswordChangeForm(FlaskForm):
         EqualTo('password', message='两次输入的密码不一致')
     ])
     submit = SubmitField('修改密码')
+
+class ProductForm(FlaskForm):
+    """商品表单"""
+    name = StringField('商品名称', validators=[
+        DataRequired(),
+        Length(min=2, max=200, message='商品名称长度必须在2-200个字符之间')
+    ])
+    description = TextAreaField('商品描述', validators=[
+        Length(max=1000, message='描述不能超过1000个字符')
+    ])
+    price = DecimalField('价格', validators=[
+        DataRequired(),
+        NumberRange(min=0.01, message='价格必须大于0')
+    ], places=2)
+    stock = IntegerField('库存', validators=[
+        DataRequired(),
+        NumberRange(min=0, message='库存不能为负数')
+    ])
+    image_url = StringField('图片URL', validators=[
+        Length(max=300, message='URL长度不能超过300个字符')
+    ])
+    is_active = BooleanField('是否上架')
+    submit = SubmitField('保存')
