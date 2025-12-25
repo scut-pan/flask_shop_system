@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}页面未找到 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-page mt-5">
+                <h1 class="display-1 text-muted">404</h1>
+                <h2 class="mb-4">页面未找到</h2>
+                <p class="lead text-muted mb-4">
+                    抱歉,您访问的页面不存在或已被删除。
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> 返回首页
+                    </a>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-shopping-bag"></i> 浏览商品
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 40px 20px;
+}
+.error-page .display-1 {
+    font-size: 120px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
