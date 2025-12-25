@@ -26,6 +26,28 @@ class CartItem(db.Model):
         """获取或创建购物车项"""
         item = CartItem.query.filter_by(user_id=user_id, product_id=product_id).first()
         if not item:
-            item = CartItem(user_id=user_id, product_id=product_id)
+            item = CartItem(user_id=user_id, product_id=product_id, quantity=1)
             db.session.add(item)
+        else:
+            item.quantity += 1
         return item
+
+    def update_quantity(self, quantity):
+        """更新数量，验证库存"""
+        from app.models import Product
+
+        product = Product.query.get(self.product_id)
+        if not product:
+            raise ValueError("商品不存在")
+
+        if quantity > product.stock:
+            raise ValueError(f"库存不足，当前库存: {product.stock}")
+
+        if quantity < 1:
+            raise ValueError("数量不能小于1")
+
+        self.quantity = quantity
+
+    def can_purchase(self):
+        """检查是否可以购买（库存是否充足）"""
+        return self.product.stock >= self.quantity
