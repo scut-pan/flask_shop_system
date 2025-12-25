@@ -21,3 +21,9 @@ def init_extensions(app):
     login_manager.login_view = 'auth.login'
     login_manager.login_message = '请先登录访问此页面'
     login_manager.login_message_category = 'info'
+    
+    # 用户加载器
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.models import User
+        return User.query.get(int(user_id))
