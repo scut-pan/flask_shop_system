@@ -93,16 +93,61 @@ uv run python main.py
 
 ```
 flask_shop_system/
-├── app/
-│   ├── models/         # 数据模型
-│   ├── routes/         # 路由蓝图
-│   ├── templates/      # HTML 模板
-│   ├── static/         # 静态文件
-│   └── utils/          # 工具函数
-├── docs/               # 项目文档
-├── .env.example        # 环境变量示例
-├── .gitignore          # Git 忽略文件
-└── pyproject.toml      # 项目配置
+├── app/                        # 应用主目录
+│   ├── __init__.py            # 应用工厂函数与初始化
+│   ├── extensions.py          # Flask扩展实例化
+│   ├── forms.py               # WTForms表单定义
+│   ├── models/                # 数据模型层
+│   │   ├── __init__.py
+│   │   ├── user.py           # 用户模型
+│   │   ├── product.py        # 商品模型
+│   │   ├── cart.py           # 购物车模型
+│   │   └── order.py          # 订单模型
+│   ├── routes/                # 路由控制层
+│   │   ├── __init__.py
+│   │   ├── main.py           # 主页路由
+│   │   ├── auth.py           # 用户认证路由
+│   │   ├── product.py        # 商品路由
+│   │   ├── cart.py           # 购物车路由
+│   │   ├── order.py          # 订单路由
+│   │   └── admin.py          # 管理员路由
+│   ├── templates/             # Jinja2模板
+│   │   ├── base.html         # 基础模板
+│   │   ├── auth/             # 认证相关模板
+│   │   ├── products/         # 商品相关模板
+│   │   ├── cart/             # 购物车模板
+│   │   ├── orders/           # 订单模板
+│   │   └── admin/            # 管理员模板
+│   ├── static/                # 静态资源
+│   │   ├── css/              # 样式文件
+│   │   ├── js/               # JavaScript文件
+│   │   └── img/              # 图片资源
+│   └── utils/                 # 工具函数
+│       ├── __init__.py
+│       ├── decorators.py     # 自定义装饰器
+│       └── helpers.py        # 辅助函数
+├── tests/                     # 测试目录
+│   ├── __init__.py
+│   ├── test_models.py        # 模型测试
+│   ├── test_routes.py        # 路由测试
+│   └── test_utils.py         # 工具函数测试
+├── docs/                      # 项目文档
+│   ├── project_overview.md   # 项目概述
+│   ├── configuration_guide.md # 配置指南
+│   ├── Flask购物网站开发分步实施指南.md
+│   ├── 订单系统实施总结.md
+│   └── Flask购物网站功能测试指南.md
+├── migrations/                # 数据库迁移文件
+├── .env.example               # 环境变量示例文件
+├── .gitignore                 # Git忽略规则
+├── .python-version            # Python版本配置
+├── pyproject.toml             # 项目依赖配置
+├── uv.lock                    # 依赖锁定文件
+├── config.py                  # 应用配置文件
+├── init_db.py                 # 数据库初始化脚本
+├── main.py                    # 应用入口文件
+├── CLAUDE.md                  # AI助手开发规则
+└── README.md                  # 项目说明文档
 ```
 
 ## 主要功能

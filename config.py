@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from urllib.parse import quote_plus
 
 class Config:
     """基础配置类"""
@@ -7,8 +8,19 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-please-change-in-production'
 
     # 数据库配置
+    # 优先从环境变量读取 MySQL 配置
+    MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
+    MYSQL_PORT = os.environ.get('MYSQL_PORT', '3306')
+    MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
+    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', 'password')
+    MYSQL_DB = os.environ.get('MYSQL_DB', 'shop_db')
+    MYSQL_CHARSET = os.environ.get('MYSQL_CHARSET', 'utf8mb4')
+
+    # 对密码进行 URL 编码,避免特殊字符(如 @)导致 URL 解析错误
+    MYSQL_PASSWORD_ENCODED = quote_plus(MYSQL_PASSWORD)
+
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'mysql+pymysql://root:password@localhost/shop_db'
+        f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD_ENCODED}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}?charset={MYSQL_CHARSET}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False  # 设为True可以看到SQL语句
 
