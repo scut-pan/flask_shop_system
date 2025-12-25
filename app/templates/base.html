@@ -71,7 +71,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">个人中心</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('order.orders') }}">我的订单</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('order.list') }}">我的订单</a></li>
                             {% if current_user.is_admin %}
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">管理后台</a></li>
