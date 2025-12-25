@@ -96,3 +96,14 @@ class CheckoutForm(FlaskForm):
         Length(min=2, max=50, message='姓名长度必须在2-50个字符之间')
     ])
     submit = SubmitField('提交订单')
+
+class UserEditForm(FlaskForm):
+    """用户编辑表单(管理员)"""
+    username = StringField('用户名', validators=[
+        DataRequired(),
+        Length(min=4, max=20, message='用户名长度必须在4-20个字符之间')
+    ])
+    email = StringField('邮箱', validators=[DataRequired(), Email()])
+    is_admin = BooleanField('管理员')
+    is_active = BooleanField('启用状态')
+    submit = SubmitField('保存')
