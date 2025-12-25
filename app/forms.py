@@ -79,3 +79,20 @@ class ProductForm(FlaskForm):
     ])
     is_active = BooleanField('是否上架')
     submit = SubmitField('保存')
+
+
+class CheckoutForm(FlaskForm):
+    """结算表单"""
+    shipping_address = TextAreaField('收货地址', validators=[
+        DataRequired(message='请输入收货地址'),
+        Length(min=10, max=500, message='收货地址长度必须在10-500个字符之间')
+    ])
+    contact_phone = StringField('联系电话', validators=[
+        DataRequired(message='请输入联系电话'),
+        Length(min=11, max=11, message='请输入正确的手机号码')
+    ])
+    recipient_name = StringField('收货人姓名', validators=[
+        DataRequired(message='请输入收货人姓名'),
+        Length(min=2, max=50, message='姓名长度必须在2-50个字符之间')
+    ])
+    submit = SubmitField('提交订单')
