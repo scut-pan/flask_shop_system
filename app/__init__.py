@@ -45,9 +45,14 @@ def register_template_context(app):
     """注册模板上下文处理器"""
     @app.context_processor
     def inject_cart_count():
-        """在所有模板中注入购物车数量"""
+        """在所有模板中注入购物车数量（商品总件数）"""
         from flask_login import current_user
+        from app.extensions import db
         if current_user.is_authenticated:
-            count = models.CartItem.query.filter_by(user_id=current_user.id).count()
+            # 统计购物车商品总件数
+            count = db.session.query(db.func.sum(models.CartItem.quantity))\
+                             .filter_by(user_id=current_user.id)\
+                             .scalar()
+            count = count or 0
             return dict(cart_count=count)
         return dict(cart_count=0)
