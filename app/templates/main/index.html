@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - Flask购物网站{% endblock %}
+
+{% block content %}
+<!-- 首页轮播图 -->
+<div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="hero-slide bg-primary text-white text-center py-5">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">欢迎来到我们的购物网站</h1>
+                    <p class="lead">发现优质商品，享受便捷购物</p>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-light btn-lg">立即选购</a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide bg-success text-white text-center py-5">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">新品上市</h1>
+                    <p class="lead">精选商品，限时优惠</p>
+                    <a href="{{ url_for('product.list') }}" class="btn btn-light btn-lg">查看详情</a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="hero-slide bg-info text-white text-center py-5">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">会员专享</h1>
+                    <p class="lead">注册会员，享受更多优惠</p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('product.list') }}" class="btn btn-light btn-lg">开始购物</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">立即注册</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<!-- 特色区域 -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">快速配送</h5>
+                    <p class="card-text">全国范围内快速配送，让您尽快收到心仪商品</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">安全支付</h5>
+                    <p class="card-text">多种支付方式，保障您的交易安全</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">贴心服务</h5>
+                    <p class="card-text">专业的客服团队，随时为您解答疑问</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 购物指南 -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">购物流程</h2>
+        <div class="row">
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">1</span>
+                </div>
+                <h5>浏览商品</h5>
+                <p class="text-muted">浏览我们的商品目录，选择您喜欢的商品</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">2</span>
+                </div>
+                <h5>加入购物车</h5>
+                <p class="text-muted">将商品添加到购物车，方便统一结算</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-info text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">3</span>
+                </div>
+                <h5>提交订单</h5>
+                <p class="text-muted">填写收货地址，确认订单信息</p>
+            </div>
+            <div class="col-md-3 text-center mb-4">
+                <div class="step-circle bg-warning text-white d-inline-flex align-items-center justify-content-center mb-3">
+                    <span class="fs-3 fw-bold">4</span>
+                </div>
+                <h5>收货评价</h5>
+                <p class="text-muted">等待收货，确认并评价商品</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
