@@ -38,5 +38,9 @@ class Product(db.Model):
     def get_image_url(self):
         """获取图片URL，如果没有则返回默认图片"""
         if self.image_url:
-            return self.image_url
+            # 如果已经是完整URL,直接返回
+            if self.image_url.startswith('http://') or self.image_url.startswith('https://'):
+                return self.image_url
+            # 否则作为静态文件路径处理
+            return url_for('static', filename=self.image_url)
         return url_for('static', filename='images/default-product.png')

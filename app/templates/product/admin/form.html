@@ -99,7 +99,7 @@
                                      alt="当前图片"
                                      class="img-thumbnail"
                                      style="max-height: 200px;"
-                                     onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'">
+                                     onerror="if(!this.dataset.loaded) { this.src='{{ url_for('static', filename='images/default-product.png') }}'; this.dataset.loaded='true'; }">
                             </div>
                         </div>
                         {% endif %}

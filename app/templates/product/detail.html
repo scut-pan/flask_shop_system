@@ -24,7 +24,7 @@
                 <img src="{{ product.get_image_url() }}"
                      class="card-img-top product-detail-image"
                      alt="{{ product.name }}"
-                     onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'">
+                     onerror="if(!this.dataset.loaded) { this.src='{{ url_for('static', filename='images/default-product.png') }}'; this.dataset.loaded='true'; }">
             </div>
         </div>
 

@@ -36,7 +36,7 @@
                                 <img src="{{ product.get_image_url() }}"
                                      alt="{{ product.name }}"
                                      class="admin-product-image"
-                                     onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'">
+                                     onerror="if(!this.dataset.loaded) { this.src='{{ url_for('static', filename='images/default-product.png') }}'; this.dataset.loaded='true'; }">
                             </td>
                             <td>
                                 <a href="{{ url_for('product.detail', product_id=product.id) }}"

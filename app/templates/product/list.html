@@ -27,7 +27,7 @@
                     <img src="{{ product.get_image_url() }}"
                          class="card-img-top product-image"
                          alt="{{ product.name }}"
-                         onerror="this.src='{{ url_for('static', filename='images/default-product.png') }}'; event.stopPropagation();">
+                         onerror="if(!this.dataset.loaded) { this.src='{{ url_for('static', filename='images/default-product.png') }}'; this.dataset.loaded='true'; }">
                 </a>
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">
