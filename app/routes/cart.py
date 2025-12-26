@@ -41,12 +41,12 @@ def add():
     # 检查商品是否上架
     if not product.is_active:
         flash('该商品已下架', 'warning')
-        return redirect(url_for('product.detail', id=product_id))
+        return redirect(url_for('product.detail', product_id=product_id))
 
     # 检查库存
     if not product.is_in_stock():
         flash('该商品库存不足', 'warning')
-        return redirect(url_for('product.detail', id=product_id))
+        return redirect(url_for('product.detail', product_id=product_id))
 
     try:
         # 获取或创建购物车项
@@ -55,7 +55,7 @@ def add():
         # 检查是否超过库存
         if cart_item.quantity > product.stock:
             flash(f'购物车中该商品数量已达库存上限({product.stock})', 'warning')
-            return redirect(url_for('product.detail', id=product_id))
+            return redirect(url_for('product.detail', product_id=product_id))
 
         db.session.commit()
         flash(f'已将"{product.name}"加入购物车', 'success')
@@ -64,7 +64,7 @@ def add():
         db.session.rollback()
         flash('添加购物车失败，请重试', 'danger')
 
-    return redirect(url_for('product.detail', id=product_id))
+    return redirect(url_for('product.detail', product_id=product_id))
 
 
 @cart_bp.route('/update', methods=['POST'])
