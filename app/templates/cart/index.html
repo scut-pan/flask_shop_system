@@ -34,7 +34,7 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 {% if item.product.image_url %}
-                                                <img src="{{ item.product.image_url }}"
+                                                <img src="{{ url_for('static', filename=item.product.image_url) }}"
                                                      alt="{{ item.product.name }}"
                                                      class="rounded me-3"
                                                      style="width: 80px; height: 80px; object-fit: cover;">
@@ -70,6 +70,7 @@
                                         <td>
                                             <form method="POST" action="{{ url_for('cart.update') }}"
                                                   class="d-flex align-items-center">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                                 <input type="hidden" name="item_id" value="{{ item.id }}">
                                                 <input type="number"
                                                        name="quantity"
@@ -96,6 +97,7 @@
                                         <td>
                                             <form method="POST" action="{{ url_for('cart.delete') }}"
                                                   onsubmit="return confirm('确定要从购物车删除该商品吗？')">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                                 <input type="hidden" name="item_id" value="{{ item.id }}">
                                                 <button type="submit"
                                                         class="btn btn-sm btn-outline-danger"
@@ -126,6 +128,7 @@
                 <div class="card-footer">
                     <form method="POST" action="{{ url_for('cart.clear') }}"
                           onsubmit="return confirm('确定要清空购物车吗？')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" class="btn btn-outline-danger">
                             <i class="fas fa-trash-alt"></i> 清空购物车
                         </button>

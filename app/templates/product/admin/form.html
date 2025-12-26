@@ -95,7 +95,7 @@
                         <div class="mb-3">
                             <label class="form-label">当前图片</label>
                             <div>
-                                <img src="{{ product.image_url }}"
+                                <img src="{{ url_for('static', filename=product.image_url) }}"
                                      alt="当前图片"
                                      class="img-thumbnail"
                                      style="max-height: 200px;"

@@ -56,10 +56,13 @@
                         </div>
                         {% if current_user.is_authenticated and product.stock > 0 %}
                         <div class="mt-2">
-                            <a href="{{ url_for('cart.add', product_id=product.id) }}"
-                               class="btn btn-primary btn-sm w-100">
-                                <i class="fas fa-cart-plus"></i> 加入购物车
-                            </a>
+                            <form method="POST" action="{{ url_for('cart.add') }}" class="d-inline">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-cart-plus"></i> 加入购物车
+                                </button>
+                            </form>
                         </div>
                         {% elif not current_user.is_authenticated %}
                         <div class="mt-2">
