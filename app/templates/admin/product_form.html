@@ -70,11 +70,12 @@
                     </div>
 
                     <div class="mb-3">
-                        {{ form.image_url.label(class="form-label") }}
-                        {{ form.image_url(class="form-control", placeholder="https://example.com/image.jpg") }}
-                        {% if form.image_url.errors %}
+                        {{ form.image.label(class="form-label") }}
+                        {{ form.image(class="form-control") }}
+                        <small class="form-text text-muted">支持 PNG、JPG、JPEG、GIF 格式,文件大小不超过 16MB</small>
+                        {% if form.image.errors %}
                             <div class="text-danger">
-                                {% for error in form.image_url.errors %}
+                                {% for error in form.image.errors %}
                                     <small>{{ error }}</small>
                                 {% endfor %}
                             </div>
@@ -100,9 +101,9 @@
     {% if action == 'edit' and product and product.image_url %}
     <div class="col-lg-4">
         <div class="card">
-            <div class="card-header">商品预览</div>
+            <div class="card-header">当前图片</div>
             <div class="card-body">
-                <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}"
                      class="img-fluid rounded">
             </div>
         </div>

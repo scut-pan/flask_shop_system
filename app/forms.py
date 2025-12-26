@@ -1,7 +1,7 @@
 """表单类"""
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField, IntegerField, DecimalField, FileField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
 from flask_wtf.file import FileAllowed, FileRequired
 from app.models import User
 
@@ -74,8 +74,9 @@ class ProductForm(FlaskForm):
         DataRequired(),
         NumberRange(min=0, message='库存不能为负数')
     ])
-    image_url = StringField('图片URL', validators=[
-        Length(max=300, message='URL长度不能超过300个字符')
+    image = FileField('商品图片', validators=[
+        Optional(),
+        FileAllowed(['png', 'jpg', 'jpeg', 'gif'], '仅支持 PNG、JPG、JPEG、GIF 格式的图片')
     ])
     is_active = BooleanField('是否上架')
     submit = SubmitField('保存')

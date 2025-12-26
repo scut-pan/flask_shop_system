@@ -1,7 +1,8 @@
 """管理员路由"""
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import login_required
 from app.utils.decorators import admin_required
+from app.utils.files import save_uploaded_file, delete_file
 from app.extensions import db
 from app.models import User, Product, Order, OrderItem
 from app.forms import ProductForm, UserEditForm
@@ -67,12 +68,21 @@ def product_add():
     form = ProductForm()
 
     if form.validate_on_submit():
+        # 处理图片上传
+        image_url = None
+        if form.image.data:
+            try:
+                image_url = save_uploaded_file(form.image.data)
+            except ValueError as e:
+                flash(str(e), 'danger')
+                return render_template('admin/product_form.html', form=form, action='add')
+
         product = Product(
             name=form.name.data,
             description=form.description.data,
             price=form.price.data,
             stock=form.stock.data,
-            image_url=form.image_url.data,
+            image_url=image_url,
             is_active=form.is_active.data
         )
         db.session.add(product)
@@ -91,11 +101,22 @@ def product_edit(product_id):
     form = ProductForm(obj=product)
 
     if form.validate_on_submit():
+        # 处理图片上传
+        if form.image.data:
+            try:
+                # 删除旧图片
+                if product.image_url:
+                    delete_file(product.image_url)
+                # 保存新图片
+                product.image_url = save_uploaded_file(form.image.data)
+            except ValueError as e:
+                flash(str(e), 'danger')
+                return render_template('admin/product_form.html', form=form, product=product, action='edit')
+
         product.name = form.name.data
         product.description = form.description.data
         product.price = form.price.data
         product.stock = form.stock.data
-        product.image_url = form.image_url.data
         product.is_active = form.is_active.data
         db.session.commit()
         flash('商品更新成功', 'success')
