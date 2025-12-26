@@ -75,6 +75,18 @@
                             </a>
                         </div>
                     </div>
+
+                    <hr>
+
+                    <h6 class="text-danger">危险操作</h6>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <a href="{{ url_for('auth.delete_account') }}" class="btn btn-outline-danger w-100"
+                               onclick="return confirm('您确定要注销账号吗?此操作不可撤销!');">
+                                <i class="fas fa-user-times"></i> 注销账号
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 

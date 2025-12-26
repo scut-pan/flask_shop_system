@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from app.extensions import db
 from app.models import User
-from app.forms import LoginForm, RegistrationForm, ProfileForm, PasswordChangeForm
+from app.forms import LoginForm, RegistrationForm, ProfileForm, PasswordChangeForm, AccountDeleteForm
 from app.utils.decorators import anonymous_required
 
 auth_bp = Blueprint('auth', __name__)
@@ -105,8 +105,35 @@ def change_password():
         current_user.set_password(form.password.data)
         db.session.commit()
 
-        flash('密码修改成功，请重新登录', 'success')
+        flash('密码修改成功,请重新登录', 'success')
         logout_user()
         return redirect(url_for('auth.login'))
 
     return render_template('auth/change_password.html', form=form)
+
+@auth_bp.route('/delete_account', methods=['GET', 'POST'])
+@login_required
+def delete_account():
+    """注销账号"""
+    # 管理员账号不允许通过前台自助注销
+    if current_user.is_admin:
+        flash('管理员账号不允许自助注销,请联系其他管理员处理', 'danger')
+        return redirect(url_for('auth.profile'))
+
+    form = AccountDeleteForm()
+    if form.validate_on_submit():
+        # 验证密码
+        if not current_user.check_password(form.password.data):
+            flash('密码错误,无法注销账号', 'danger')
+            return render_template('auth/delete_account.html', form=form)
+
+        # 删除用户(级联删除订单和购物车)
+        db.session.delete(current_user)
+        db.session.commit()
+
+        # 登出并重定向
+        logout_user()
+        flash('您的账号已成功注销,期待再次相见', 'info')
+        return redirect(url_for('main.index'))
+
+    return render_template('auth/delete_account.html', form=form)

@@ -107,3 +107,9 @@ class UserEditForm(FlaskForm):
     is_admin = BooleanField('管理员')
     is_active = BooleanField('启用状态')
     submit = SubmitField('保存')
+
+class AccountDeleteForm(FlaskForm):
+    """注销账号表单"""
+    password = PasswordField('请输入当前密码确认身份', validators=[DataRequired()])
+    confirm = BooleanField('我确认要永久注销账号,此操作不可撤销', validators=[DataRequired(message='请勾选确认框以继续')])
+    submit = SubmitField('确认注销账号')

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}注销账号 - Flask购物网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> 注销账号
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 警告信息 -->
+                <div class="alert alert-danger" role="alert">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-circle"></i> 警告:此操作不可撤销!
+                    </h6>
+                    <hr>
+                    <p class="mb-2">注销账号后,以下数据将被<strong class="text-danger">永久删除</strong>:</p>
+                    <ul class="mb-0">
+                        <li>您的个人信息(用户名、邮箱等)</li>
+                        <li>您的所有订单记录</li>
+                        <li>您的购物车中的商品</li>
+                    </ul>
+                </div>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- 密码确认 -->
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control") }}
+                        <div class="form-text">请输入当前密码以确认身份</div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- 确认复选框 -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.confirm(class="form-check-input") }}
+                            {{ form.confirm.label(class="form-check-label fw-bold") }}
+                            {% if form.confirm.errors %}
+                                {% for error in form.confirm.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 二次警告 -->
+                    <div class="alert alert-warning">
+                        <i class="fas fa-hand-paper"></i>
+                        请谨慎考虑!账号一旦注销无法恢复,如需使用本服务需要重新注册。
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 取消
+                        </a>
+                        {{ form.submit(class="btn btn-danger") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
