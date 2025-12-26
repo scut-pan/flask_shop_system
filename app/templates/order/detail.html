@@ -173,6 +173,7 @@
                         {% if order.can_cancel() %}
                         <form method="POST" action="{{ url_for('order.cancel', id=order.id) }}"
                               onsubmit="return confirm('确定要取消该订单吗？取消后库存将被恢复。')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="btn btn-danger">
                                 <i class="fas fa-times-circle"></i> 取消订单
                             </button>
