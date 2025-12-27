@@ -206,12 +206,17 @@ docker compose logs -f
 
 #### 步骤 5: 初始化数据库
 
+**⚠️ 重要提示:**
+- 确保 `migrations` 目录存在并已提交到 Git 仓库
+- 如果 `migrations` 目录不存在,需要在本地先运行 `flask db init` 和 `flask db migrate`
+- 详见"故障排查 > 问题 6: 迁移文件缺失"
+
 ```powershell
 # 等待 MySQL 完全启动后(约 30 秒),运行数据库迁移
-docker compose exec web flask db upgrade
+docker compose exec web uv run flask db upgrade
 
 # 创建管理员账户
-docker compose exec web python -c "from app.extensions import db; from app.models import User; from werkzeug.security import generate_password_hash; admin = User(username='admin', email='admin@example.com', password_hash=generate_password_hash('Admin@123'), is_admin=True); db.session.add(admin); db.session.commit(); print('管理员账户创建成功!')"
+docker compose exec web uv run python -c "from app.extensions import db; from app.models import User; from werkzeug.security import generate_password_hash; admin = User(username='admin', email='admin@example.com', password_hash=generate_password_hash('Admin@123'), is_admin=True); db.session.add(admin); db.session.commit(); print('管理员账户创建成功!')"
 ```
 
 **预期输出:**
@@ -307,12 +312,16 @@ docker compose logs -f
 
 ### 步骤 4: 初始化数据库
 
+**⚠️ 重要提示:**
+- 确保 `migrations` 目录存在并已提交到 Git 仓库
+- 如果 `migrations` 目录不存在,需要在本地先运行 `flask db init` 和 `flask db migrate`
+
 ```bash
 # 等待 MySQL 完全启动后,运行数据库迁移
-docker compose exec web flask db upgrade
+docker compose exec web uv run flask db upgrade
 
 # 创建管理员账户
-docker compose exec web python -c "
+docker compose exec web uv run python -c "
 from app.extensions import db
 from app.models import User
 from werkzeug.security import generate_password_hash
@@ -444,10 +453,10 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 ```bash
 # 运行数据库迁移
-docker compose exec web flask db upgrade
+docker compose exec web uv run flask db upgrade
 
 # 创建管理员账户
-docker compose exec web python -c "
+docker compose exec web uv run python -c "
 from app.extensions import db
 from app.models import User
 from werkzeug.security import generate_password_hash
@@ -538,16 +547,16 @@ docker compose exec -T mysql mysql -u root -p shop_db < backup_20250127.sql
 docker compose exec web bash
 
 # 在容器中运行 Flask 命令
-docker compose exec web flask --help
+docker compose exec web uv run flask --help
 
 # 查看数据库迁移状态
-docker compose exec web flask db current
+docker compose exec web uv run flask db current
 
 # 升级数据库
-docker compose exec web flask db upgrade
+docker compose exec web uv run flask db upgrade
 
 # 创建新的迁移
-docker compose exec web flask db migrate -m "描述"
+docker compose exec web uv run flask db migrate -m "描述"
 ```
 
 ### 更新应用
@@ -615,7 +624,7 @@ docker compose ps mysql
 docker compose logs mysql
 
 # 测试数据库连接
-docker compose exec web python -c "
+docker compose exec web uv run python -c "
 from app import create_app
 app = create_app()
 with app.app_context():
@@ -686,6 +695,34 @@ services:
 # 减少 Gunicorn 工作进程数 (修改 gunicorn_config.py)
 workers = 2  # 减少工作进程数
 ```
+
+### 问题 6: 迁移文件缺失
+
+**症状**: 运行 `flask db upgrade` 时出现 `ImportError: Can't find Python file migrations/env.py`
+
+**原因**: 项目中缺少 `migrations` 目录或迁移文件
+
+**解决方法**:
+
+```bash
+# 在本地开发环境中初始化 Flask-Migrate
+flask db init
+
+# 创建初始迁移
+flask db migrate -m "初始迁移"
+
+# 将 migrations 目录提交到 Git
+git add migrations/
+git commit -m "添加数据库迁移文件"
+
+# 重新部署到 Docker
+docker compose up -d --build
+```
+
+**注意事项:**
+- `migrations` 目录应该包含在 Git 仓库中
+- 不要将 `migrations` 目录添加到 `.gitignore`
+- 每次修改数据库模型后,都要创建新的迁移文件并提交到 Git
 
 ---
 
