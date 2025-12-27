@@ -18,7 +18,8 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), 
+                           onupdate=lambda: datetime.now(timezone.utc))
 
     # 关系定义
     orders = db.relationship('Order', backref='user', lazy='dynamic', cascade='all, delete-orphan')

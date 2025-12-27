@@ -1,9 +1,12 @@
 """Flask应用"""
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
-# 在导入其他模块之前先加载 .env 文件
-load_dotenv()
+# 优先加载 .env.local (本地开发),如果不存在则加载 .env (Docker部署)
+env_path = Path(__file__).parent.parent / '.env.local'
+load_dotenv(env_path, override=True)  # 优先加载 .env.local
+load_dotenv()  # 如果 .env.local 不存在,加载 .env
 
 from flask import Flask, render_template
 from app.extensions import db
@@ -33,6 +36,12 @@ def create_app(config_name='default'):
 
     # 注册模板上下文处理器
     register_template_context(app)
+
+    # 注册健康检查端点
+    @app.route('/health')
+    def health_check():
+        """健康检查端点,用于容器编排和服务监控"""
+        return {'status': 'healthy', 'message': 'Flask Shop is running'}, 200
 
     return app
 

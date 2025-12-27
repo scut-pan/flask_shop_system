@@ -18,7 +18,6 @@ CLAUDE.md
 # Environment variables and sensitive configuration
 .env
 .env.local
-*.env
 config_local.py
 config_local.yaml
 secrets.yaml

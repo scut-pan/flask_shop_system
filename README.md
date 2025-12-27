@@ -13,14 +13,65 @@
 
 ## 快速开始
 
-### 1. 克隆项目
+### 方式一：Docker 部署（推荐）
+
+使用 Docker Compose 可以快速部署整个应用栈（包括 MySQL、Nginx）：
+
+#### 1. 安装 Docker 和 Docker Compose
+
+参考 [Docker 部署指南](docs/Docker部署指南.md#安装-docker-和-docker-compose)
+
+#### 2. 配置环境变量
+
+```bash
+# 复制生产环境配置模板
+cp .env.production .env
+
+# 生成 SECRET_KEY
+python3 -c "import secrets; print(secrets.token_hex(32))"
+
+# 编辑 .env 文件，设置必要的配置项
+nano .env
+```
+
+必须修改的配置项：
+- `SECRET_KEY`: Flask 密钥（使用上面的命令生成）
+- `MYSQL_ROOT_PASSWORD`: MySQL root 密码
+- `MYSQL_PASSWORD`: 应用数据库密码
+- `MAIL_USERNAME`: 邮箱地址
+- `MAIL_PASSWORD`: 邮箱授权码
+
+#### 3. 一键部署
+
+```bash
+# 使用部署脚本（推荐）
+chmod +x deploy.sh
+bash deploy.sh prod
+
+# 或手动部署
+docker compose up -d --build
+docker compose exec web flask db upgrade
+```
+
+#### 4. 访问应用
+
+- HTTP: `http://localhost` 或 `http://your-server-ip`
+- HTTPS: `https://your-domain.com`（需要配置 SSL 证书）
+
+详细部署说明请查看 [Docker 部署指南](docs/Docker部署指南.md)
+
+---
+
+### 方式二：本地开发环境
+
+#### 1. 克隆项目
 
 ```bash
 git clone <your-repo-url>
 cd flask_shop_system
 ```
 
-### 2. 安装依赖
+#### 2. 安装依赖
 
 使用 uv 包管理器（推荐）：
 
@@ -32,18 +83,19 @@ pip install uv
 uv sync
 ```
 
-### 3. 配置环境变量
+#### 3. 配置环境变量
 
-**重要**：创建 `.env` 文件存储敏感配置（该文件已在 `.gitignore` 中，不会被提交）：
+**重要**：创建 `.env.local` 文件存储敏感配置（该文件已在 `.gitignore` 中，不会被提交）：
 
 ```bash
-# 复制示例文件
-cp .env.example .env
+# 复制本地开发配置模板
+cp .env.example .env.local
 
-# 编辑 .env 文件，填入真实配置
+# 编辑 .env.local 文件，填入真实配置
+nano .env.local
 ```
 
-`.env` 文件内容示例：
+`.env.local` 文件内容示例：
 
 ```env
 SECRET_KEY=your-secret-key-here
@@ -57,7 +109,7 @@ FLASK_ENV=development
 FLASK_DEBUG=1
 ```
 
-### 4. 创建数据库
+#### 4. 创建数据库
 
 登录 MySQL 并创建数据库：
 
@@ -74,14 +126,14 @@ EXIT;
 
 **注意**：将 `.env` 文件中的 `MYSQL_PASSWORD` 设置为这里创建的密码。
 
-### 5. 初始化数据库
+#### 5. 初始化数据库
 
 ```bash
 # 使用 uv 运行 Flask 命令
-uv run flask init-db
+uv run flask db upgrade
 ```
 
-### 6. 运行项目
+#### 6. 运行项目
 
 ```bash
 uv run python main.py
@@ -121,7 +173,8 @@ flask_shop_system/
 │   ├── static/                # 静态资源
 │   │   ├── css/              # 样式文件
 │   │   ├── js/               # JavaScript文件
-│   │   └── img/              # 图片资源
+│   │   ├── img/              # 图片资源
+│   │   └── images/uploads/   # 用户上传的图片
 │   └── utils/                 # 工具函数
 │       ├── __init__.py
 │       ├── decorators.py     # 自定义装饰器
@@ -134,18 +187,29 @@ flask_shop_system/
 ├── docs/                      # 项目文档
 │   ├── project_overview.md   # 项目概述
 │   ├── configuration_guide.md # 配置指南
+│   ├── Docker部署指南.md      # Docker部署详细文档
 │   ├── Flask购物网站开发分步实施指南.md
 │   ├── 订单系统实施总结.md
 │   └── Flask购物网站功能测试指南.md
+├── nginx/                     # Nginx配置文件
+│   ├── nginx.conf            # Nginx主配置
+│   ├── conf.d/               # 站点配置
+│   ├── ssl/                  # SSL证书目录
+│   └── logs/                 # Nginx日志
 ├── migrations/                # 数据库迁移文件
-├── .env.example               # 环境变量示例文件
+├── .env.production            # 生产环境配置模板
 ├── .gitignore                 # Git忽略规则
+├── .dockerignore              # Docker构建忽略规则
 ├── .python-version            # Python版本配置
 ├── pyproject.toml             # 项目依赖配置
 ├── uv.lock                    # 依赖锁定文件
 ├── config.py                  # 应用配置文件
 ├── init_db.py                 # 数据库初始化脚本
 ├── main.py                    # 应用入口文件
+├── deploy.sh                  # 一键部署脚本
+├── docker-compose.yml         # Docker Compose配置
+├── Dockerfile                 # 应用镜像构建文件
+├── gunicorn_config.py         # Gunicorn WSGI服务器配置
 ├── CLAUDE.md                  # AI助手开发规则
 └── README.md                  # 项目说明文档
 ```
@@ -161,12 +225,61 @@ flask_shop_system/
 - ✅ 订单系统
 - ✅ 管理员后台
 
+## Docker 部署说明
+
+### 快速部署
+
+```bash
+# 1. 配置环境变量
+cp .env.production .env
+nano .env  # 修改必要的配置项
+
+# 2. 一键部署
+chmod +x deploy.sh
+bash deploy.sh prod
+```
+
+### 常用命令
+
+```bash
+# 查看服务状态
+docker compose ps
+
+# 查看日志
+docker compose logs -f
+
+# 停止服务
+docker compose stop
+
+# 重启服务
+docker compose restart
+
+# 更新应用
+git pull
+docker compose up -d --build
+```
+
+### 访问应用
+
+- HTTP: `http://localhost` 或 `http://your-server-ip`
+- HTTPS: `https://your-domain.com`（需要配置 SSL）
+
+### 测试账户
+
+部署后可使用的管理员账户:
+- 用户名: `admin`
+- 密码: `Admin@123`
+
+⚠️ **请在生产环境中立即修改默认密码！**
+
+详细部署文档请查看: [Docker 部署指南](docs/Docker部署指南.md)
+
 ## 开发文档
 
 详细开发指南请查看：
-- [开发指南](docs/development_guide.md)
-- [配置说明](docs/configuration_guide.md)
+- [Docker 部署指南](docs/Docker部署指南.md)
 - [项目概述](docs/project_overview.md)
+- [配置说明](docs/configuration_guide.md)
 
 ## 安全提示
 

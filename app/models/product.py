@@ -17,10 +17,12 @@ class Product(db.Model):
     image_url = db.Column(db.String(300))
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), 
+                           onupdate=lambda: datetime.now(timezone.utc))
 
     # 关系定义
-    cart_items = db.relationship('CartItem', backref='product', lazy='dynamic', cascade='all, delete-orphan')
+    cart_items = db.relationship('CartItem', backref='product', 
+                                 lazy='dynamic', cascade='all, delete-orphan')
     order_items = db.relationship('OrderItem', backref='product', lazy='dynamic')
 
     def __repr__(self):

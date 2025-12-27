@@ -17,7 +17,8 @@ class Order(db.Model):
                             name='order_status'), default='pending')
     shipping_address = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), 
+                           onupdate=lambda: datetime.now(timezone.utc))
 
     # 关系定义
     items = db.relationship('OrderItem', backref='order', lazy='dynamic', cascade='all, delete-orphan')
