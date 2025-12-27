@@ -1,8 +1,10 @@
 """商品模型"""
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from app.extensions import db
 from flask import url_for
-from datetime import timezone
+
+# 定义东八区时区
+CHINA_TZ = timezone(timedelta(hours=8))
 
 class Product(db.Model):
     __tablename__ = 'products'
@@ -44,3 +46,23 @@ class Product(db.Model):
             # 否则作为静态文件路径处理
             return url_for('static', filename=self.image_url)
         return url_for('static', filename='images/default-product.png')
+
+    @property
+    def created_at_local(self):
+        """获取本地时间(东八区)"""
+        if self.created_at:
+            if self.created_at.tzinfo is not None:
+                return self.created_at.astimezone(CHINA_TZ)
+            else:
+                return self.created_at.replace(tzinfo=timezone.utc).astimezone(CHINA_TZ)
+        return None
+
+    @property
+    def updated_at_local(self):
+        """获取本地时间(东八区)"""
+        if self.updated_at:
+            if self.updated_at.tzinfo is not None:
+                return self.updated_at.astimezone(CHINA_TZ)
+            else:
+                return self.updated_at.replace(tzinfo=timezone.utc).astimezone(CHINA_TZ)
+        return None

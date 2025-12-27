@@ -59,7 +59,7 @@
                                     {% if product.is_active %}上架{% else %}下架{% endif %}
                                 </span>
                             </td>
-                            <td><small>{{ product.created_at.strftime('%Y-%m-%d') }}</small></td>
+                            <td><small>{{ product.created_at_local.strftime('%Y-%m-%d') if product.created_at_local else '' }}</small></td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="{{ url_for('product.edit', product_id=product.id) }}"

@@ -57,7 +57,7 @@
                                     <span class="badge bg-secondary">已下架</span>
                                 {% endif %}
                             </td>
-                            <td>{{ product.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ product.created_at_local.strftime('%Y-%m-%d') if product.created_at_local else '' }}</td>
                             <td>
                                 <a href="{{ url_for('admin.product_edit', product_id=product.id) }}"
                                    class="btn btn-sm btn-outline-primary">

@@ -91,9 +91,9 @@
 
             <!-- 商品元信息 -->
             <div class="mt-4 text-muted small">
-                <p><i class="fas fa-clock"></i> 上架时间: {{ product.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><i class="fas fa-clock"></i> 上架时间: {{ product.created_at_local.strftime('%Y-%m-%d %H:%M') if product.created_at_local else '' }}</p>
                 {% if product.updated_at != product.created_at %}
-                <p><i class="fas fa-edit"></i> 更新时间: {{ product.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><i class="fas fa-edit"></i> 更新时间: {{ product.updated_at_local.strftime('%Y-%m-%d %H:%M') if product.updated_at_local else '' }}</p>
                 {% endif %}
             </div>
         </div>

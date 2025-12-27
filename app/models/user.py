@@ -1,9 +1,12 @@
 """用户模型"""
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
+
+# 定义东八区时区
+CHINA_TZ = timezone(timedelta(hours=8))
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -42,3 +45,23 @@ class User(UserMixin, db.Model):
         for item in self.cart_items:
             total += item.product.price * item.quantity
         return total
+
+    @property
+    def created_at_local(self):
+        """获取本地时间(东八区)"""
+        if self.created_at:
+            if self.created_at.tzinfo is not None:
+                return self.created_at.astimezone(CHINA_TZ)
+            else:
+                return self.created_at.replace(tzinfo=timezone.utc).astimezone(CHINA_TZ)
+        return None
+
+    @property
+    def updated_at_local(self):
+        """获取本地时间(东八区)"""
+        if self.updated_at:
+            if self.updated_at.tzinfo is not None:
+                return self.updated_at.astimezone(CHINA_TZ)
+            else:
+                return self.updated_at.replace(tzinfo=timezone.utc).astimezone(CHINA_TZ)
+        return None

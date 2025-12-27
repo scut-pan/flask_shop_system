@@ -71,8 +71,8 @@
                 <h6>基本信息</h6>
                 <ul class="list-unstyled">
                     <li><strong>用户ID:</strong> {{ user.id }}</li>
-                    <li><strong>注册时间:</strong> {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
-                    <li><strong>最后更新:</strong> {{ user.updated_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                    <li><strong>注册时间:</strong> {{ user.created_at_local.strftime('%Y-%m-%d %H:%M') if user.created_at_local else '' }}</li>
+                    <li><strong>最后更新:</strong> {{ user.updated_at_local.strftime('%Y-%m-%d %H:%M') if user.updated_at_local else '' }}</li>
                 </ul>
 
                 <hr>

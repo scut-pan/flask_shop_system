@@ -41,7 +41,7 @@
                         </tr>
                         <tr>
                             <td><strong>注册时间:</strong></td>
-                            <td>{{ current_user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ current_user.created_at_local.strftime('%Y-%m-%d %H:%M') if current_user.created_at_local else '' }}</td>
                         </tr>
                         <tr>
                             <td><strong>账户类型:</strong></td>
