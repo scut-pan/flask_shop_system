@@ -113,6 +113,7 @@
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ url_for('admin.order_update_status', order_id=order.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label class="form-label">选择新状态:</label>
                         <select name="status" class="form-select" required>

@@ -54,7 +54,8 @@ def register_template_context(app):
         """在所有模板中注入购物车数量（商品总件数）"""
         from flask_login import current_user
         from app.extensions import db
-        if current_user.is_authenticated:
+        # 检查 current_user 是否存在且已认证(避免在邮件模板等非请求上下文中出错)
+        if current_user and getattr(current_user, 'is_authenticated', False):
             # 统计购物车商品总件数
             count = db.session.query(db.func.sum(models.CartItem.quantity))\
                              .filter_by(user_id=current_user.id)\

@@ -30,6 +30,9 @@ class Config:
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_USERNAME')  # 设置默认发件人
+    MAIL_MAX_EMAILS = None  # 不限制邮件数量
+    MAIL_ASCII_ATTACHMENTS = False  # 允许非ASCII字符(支持中文附件名)
 
     # 文件上传配置
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)),

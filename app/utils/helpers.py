@@ -5,7 +5,27 @@ from app.extensions import mail
 from flask_mail import Message
 import os
 import uuid
+import sys
 from threading import Thread
+
+# 修复Flask-Mail中文编码问题
+def patch_flask_mail():
+    """修补Flask-Mail以支持中文邮件主题"""
+    import flask_mail
+    from email.policy import SMTPUTF8
+
+    original_as_bytes = flask_mail.Message.as_bytes
+
+    def patched_as_bytes(self):
+        """使用UTF-8策略编码邮件"""
+        # 创建使用SMTPUTF8策略的消息
+        msg = self._message()
+        return msg.as_bytes(policy=SMTPUTF8)
+
+    flask_mail.Message.as_bytes = patched_as_bytes
+
+# 应用修补
+patch_flask_mail()
 
 def allowed_file(filename):
     """检查文件扩展名是否允许"""
@@ -50,13 +70,13 @@ def send_order_confirmation_email(order):
     try:
         # 检查是否配置了邮件服务器
         if not current_app.config.get('MAIL_USERNAME'):
-            current_app.logger.warning('邮件未配置，跳过发送订单确认邮件')
+            current_app.logger.warning('邮件未配置,跳过发送订单确认邮件')
             return False
 
         # 创建邮件消息
         msg = Message(
             subject=f'订单确认 - {order.order_number}',
-            sender=current_app.config['MAIL_USERNAME'],
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER') or current_app.config['MAIL_USERNAME'],
             recipients=[order.user.email]
         )
 
