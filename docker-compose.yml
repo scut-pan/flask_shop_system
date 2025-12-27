@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MySQL 数据库服务
   mysql:
@@ -18,7 +16,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --authentication_policy=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
       interval: 10s
