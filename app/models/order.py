@@ -1,7 +1,10 @@
 """订单模型"""
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from app.extensions import db
 import uuid
+
+# 定义东八区时区
+CHINA_TZ = timezone(timedelta(hours=8))
 
 class Order(db.Model):
     __tablename__ = 'orders'
@@ -46,6 +49,30 @@ class Order(db.Model):
     def can_cancel(self):
         """检查是否可以取消订单"""
         return self.status in ['pending', 'paid']
+
+    @property
+    def created_at_local(self):
+        """获取本地时间(东八区)"""
+        if self.created_at:
+            # 如果created_at有时区信息,转换到东八区
+            if self.created_at.tzinfo is not None:
+                return self.created_at.astimezone(CHINA_TZ)
+            # 如果没有时区信息,假设是UTC时间,添加时区后转换
+            else:
+                return self.created_at.replace(tzinfo=timezone.utc).astimezone(CHINA_TZ)
+        return None
+
+    @property
+    def updated_at_local(self):
+        """获取本地时间(东八区)"""
+        if self.updated_at:
+            # 如果updated_at有时区信息,转换到东八区
+            if self.updated_at.tzinfo is not None:
+                return self.updated_at.astimezone(CHINA_TZ)
+            # 如果没有时区信息,假设是UTC时间,添加时区后转换
+            else:
+                return self.updated_at.replace(tzinfo=timezone.utc).astimezone(CHINA_TZ)
+        return None
 
 class OrderItem(db.Model):
     __tablename__ = 'order_items'

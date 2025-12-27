@@ -47,7 +47,7 @@
                                 </tr>
                                 <tr>
                                     <td class="text-muted">下单时间:</td>
-                                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>{{ order.created_at_local.strftime('%Y-%m-%d %H:%M:%S') if order.created_at_local else '' }}</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">订单状态:</td>
