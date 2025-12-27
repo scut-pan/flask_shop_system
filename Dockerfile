@@ -41,5 +41,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# 使用 Gunicorn 运行应用
-CMD ["gunicorn", "--config", "gunicorn_config.py", "main:app"]
+# 使用 Gunicorn 运行应用 (通过 uv 运行)
+CMD ["uv", "run", "gunicorn", "--config", "gunicorn_config.py", "main:app"]

@@ -30,3 +30,8 @@ secrets.yaml
 # IDE settings
 .vscode/
 .claude/
+
+# Logs
+logs/
+nginx/logs/
+*.log
