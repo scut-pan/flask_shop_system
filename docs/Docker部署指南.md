@@ -372,14 +372,14 @@ app.app_context().push()
 admin = User(
     username='admin',
     email='admin@example.com',
-    password_hash=generate_password_hash('Admin@123'),
+    password_hash=generate_password_hash('admin123'),
     is_admin=True
 )
 db.session.add(admin)
 db.session.commit()
 print('管理员账户创建成功!')
 print('用户名: admin')
-print('密码: Admin@123')
+print('密码: admin123')
 "
 ```
 
@@ -670,14 +670,14 @@ app.app_context().push()
 admin = User(
     username='admin',
     email='admin@example.com',
-    password_hash=generate_password_hash('Admin@123'),
+    password_hash=generate_password_hash('admin123'),
     is_admin=True
 )
 db.session.add(admin)
 db.session.commit()
 print('管理员账户创建成功!')
 print('用户名: admin')
-print('密码: Admin@123')
+print('密码: admin123')
 "
 ```
 
@@ -691,7 +691,7 @@ print('密码: Admin@123')
 
 使用以下账户登录:
 - 用户名: `admin`
-- 密码: `Admin@123`
+- 密码: `admin123`
 
 ### 步骤 7: (可选) 配置域名和 HTTPS
 
@@ -867,7 +867,7 @@ app.app_context().push()
 admin = User(
     username='admin',
     email='admin@example.com',
-    password_hash=generate_password_hash('Admin@123'),
+    password_hash=generate_password_hash('admin123'),
     is_admin=True
 )
 db.session.add(admin)
@@ -1337,7 +1337,7 @@ flask_shop_system/
 
 - **管理员账户**:
   - 用户名: `admin`
-  - 密码: `Admin@123` (首次部署后请立即修改)
+  - 密码: `admin123` (首次部署后请立即修改)
 
 - **测试用户**: 需自行注册
 
