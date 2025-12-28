@@ -6,6 +6,7 @@
 - [前置要求](#前置要求)
 - [本地部署测试](#本地部署测试)
 - [云服务器部署](#云服务器部署)
+  - [阿里云服务器部署](#阿里云服务器部署)
 - [常用运维命令](#常用运维命令)
 - [故障排查](#故障排查)
 - [安全建议](#安全建议)
@@ -59,7 +60,45 @@
 
 ### 3. 安装 Docker 和 Docker Compose
 
-#### Ubuntu/Debian
+#### Ubuntu/Debian (阿里云ECS专用)
+
+**⚠️ 重要提示:** 阿里云ECS服务器无法访问Docker官方源,必须使用阿里云镜像源。
+
+```bash
+# 更新包索引
+sudo apt-get update
+
+# 安装依赖
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+
+# 创建密钥目录
+sudo mkdir -p /etc/apt/keyrings
+
+# 添加阿里云 Docker GPG 密钥
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# 添加阿里云 Docker 仓库
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 安装 Docker
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# 启动 Docker 服务
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 验证安装
+docker --version
+docker compose version
+sudo systemctl status docker
+```
+
+#### Ubuntu/Debian (非阿里云服务器)
+
+如果服务器不是阿里云ECS,可以使用Docker官方源:
 
 ```bash
 # 更新包索引
@@ -402,27 +441,101 @@ ssh root@your-server-ip
 
 ### 步骤 1: 连接到阿里云 ECS 服务器
 
+#### 1.1 Windows 用户使用密钥文件连接
+
+**如果遇到权限错误 (Permission denied):**
+
+在 PowerShell 中执行以下命令修复权限:
+
+```powershell
+# 假设密钥文件路径是 D:\my-server-key.pem
+$path = "D:\my-server-key.pem"
+
+# 移除继承权限
+icacls $path /inheritance:r
+
+# 移除其他用户的权限
+icacls $path /remove "NT AUTHORITY\Authenticated Users"
+icacls $path /remove "BUILTIN\Users"
+
+# 只给当前用户完全控制权限
+icacls $path /grant "$($env:USERNAME):F"
+
+# 验证权限
+icacls $path
+```
+
+**或者使用更简单的方法(复制到用户目录):**
+
+```powershell
+# 创建.ssh目录
+$sshPath = "$env:USERPROFILE\.ssh"
+New-Item -Path $sshPath -ItemType Directory -Force
+
+# 复制密钥到.ssh目录
+Copy-Item "D:\path\to\your-key.pem" "$sshPath\server-key.pem"
+
+# 移除继承权限并设置为只有当前用户可访问
+icacls "$sshPath\server-key.pem" /inheritance:r
+icacls "$sshPath\server-key.pem" /grant "$($env:USERNAME):F"
+
+# 使用新路径连接
+ssh -i "$sshPath\server-key.pem" root@your-server-ip
+```
+
+#### 1.2 使用 SSH 连接到服务器
+
 ```bash
 # 使用 SSH 连接到阿里云 ECS 服务器
 # 将 your-server-ip 替换为你的 ECS 实例公网 IP
-ssh root@your-server-ip
-
-# 如果使用密钥对认证:
 ssh -i /path/to/key.pem root@your-server-ip
 
-# Windows 用户可以使用 PowerShell 或其他 SSH 客户端
-# 例如: ssh root@your-server-ip
+# Windows 示例:
+# ssh -i "D:\my-server-key.pem" root@8.138.112.249
 ```
 
 **登录成功后,你将看到类似以下的提示符:**
 ```
-Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-162-generic x86_64)
-root@iZj6cxxxxxxZ:~#
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-161-generic x86_64)
+root@iZ7xvarr7yv637z9hpal1iZ:~#
 ```
 
 ### 步骤 2: 安装 Docker
 
-按照上面的 "安装 Docker 和 Docker Compose" 步骤安装。
+**⚠️ 重要:** 阿里云ECS必须使用阿里云镜像源安装Docker,请参考前面的 "Ubuntu/Debian (阿里云ECS专用)" 章节。
+
+快速安装命令:
+
+```bash
+# 更新包索引
+sudo apt-get update
+
+# 安装依赖
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+
+# 创建密钥目录
+sudo mkdir -p /etc/apt/keyrings
+
+# 添加阿里云 Docker GPG 密钥
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# 添加阿里云 Docker 仓库
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 安装 Docker
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# 启动 Docker 服务
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 验证安装
+docker --version
+docker compose version
+```
 
 ### 步骤 3: 部署项目
 
@@ -904,7 +1017,84 @@ services:
 workers = 2  # 减少工作进程数
 ```
 
-### 问题 6: 迁移文件缺失
+### 问题 6: Windows SSH 密钥权限错误
+
+**症状**: SSH 连接时提示 `Permission denied` 或 `bad permissions`
+
+**原因**: Windows 的 SSH 客户端要求密钥文件只能被当前用户访问,权限过于开放会拒绝连接。
+
+**解决方法**:
+
+**方法1: 使用 PowerShell 修复权限**
+
+```powershell
+# 假设密钥文件路径是 D:\my-server-key.pem
+$path = "D:\my-server-key.pem"
+
+# 移除继承权限
+icacls $path /inheritance:r
+
+# 移除其他用户的权限
+icacls $path /remove "NT AUTHORITY\Authenticated Users"
+icacls $path /remove "BUILTIN\Users"
+
+# 只给当前用户完全控制权限
+icacls $path /grant "$($env:USERNAME):F"
+```
+
+**方法2: 复制到用户 .ssh 目录**
+
+```powershell
+# 创建.ssh目录
+$sshPath = "$env:USERPROFILE\.ssh"
+New-Item -Path $sshPath -ItemType Directory -Force
+
+# 复制密钥到.ssh目录
+Copy-Item "D:\path\to\your-key.pem" "$sshPath\server-key.pem"
+
+# 设置权限
+icacls "$sshPath\server-key.pem" /inheritance:r
+icacls "$sshPath\server-key.pem" /grant "$($env:USERNAME):F"
+
+# 使用新路径连接
+ssh -i "$sshPath\server-key.pem" root@your-server-ip
+```
+
+**方法3: 使用 Git Bash**
+
+```bash
+# 复制密钥到项目目录
+cp "D:\path\to\your-key.pem" ./server-key.pem
+
+# 修复权限
+chmod 600 ./server-key.pem
+
+# 连接
+ssh -i ./server-key.pem root@your-server-ip
+```
+
+### 问题 7: 阿里云ECS无法访问Docker官方源
+
+**症状**: `curl: (35) OpenSSL SSL_connect: Connection reset by peer`
+
+**原因**: 阿里云ECS服务器无法访问Docker官方源 `https://download.docker.com`
+
+**解决方法**: 使用阿里云镜像源
+
+```bash
+# 使用阿里云镜像源
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.aliyun.com/docker-ce/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+```
+
+### 问题 8: 迁移文件缺失
 
 **症状**: 运行 `flask db upgrade` 时出现 `ImportError: Can't find Python file migrations/env.py`
 
