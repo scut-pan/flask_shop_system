@@ -537,33 +537,11 @@ docker --version
 docker compose version
 ```
 
-### 步骤 3: 部署项目
+### 步骤 3: 配置阿里云安全组
 
-```bash
-# 安装 Git
-sudo apt-get install -y git  # Ubuntu/Debian
-sudo yum install -y git      # CentOS/RHEL
+**⚠️ 重要:** 在部署应用之前,必须先配置安全组规则,否则外部无法访问你的服务。
 
-# 克隆项目代码
-git clone https://github.com/your-username/flask_shop_system.git
-cd flask_shop_system
-
-# 或者上传代码到服务器
-# scp -r /local/path/to/project root@your-server-ip:/root/flask_shop_system
-
-# 复制并编辑配置文件
-cp .env.production .env
-nano .env
-
-# 修改配置后,启动服务
-docker compose up -d --build
-```
-
-### 步骤 4: 配置阿里云安全组
-
-在阿里云上部署应用,**必须配置安全组规则**才能让外部访问你的服务。
-
-#### 4.1 通过阿里云控制台配置安全组(推荐)
+#### 3.1 通过阿里云控制台配置安全组(推荐)
 
 1. **登录阿里云 ECS 控制台**
    - 进入「云服务器 ECS」→「实例」
@@ -591,31 +569,135 @@ docker compose up -d --build
 5. **保存规则**
    - 点击「确定」保存配置
 
-#### 4.2 服务器内部防火墙配置(可选)
-
-阿里云安全组已经提供了足够的防护,服务器内部防火墙可以不配置。如果你想额外配置,可以使用以下命令:
+#### 3.2 验证安全组规则
 
 ```bash
-# Ubuntu/Debian (UFW)
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 22/tcp    # 允许 SSH
-sudo ufw enable
-
-# CentOS/RHEL (firewalld)
-sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --permanent --add-service=ssh
-sudo firewall-cmd --reload
+# 在本地计算机测试端口是否开放
+telnet your-server-ip 80
+# 或使用
+nc -zv your-server-ip 80
 ```
 
-**注意**: 如果配置了服务器内部防火墙,同时也要确保阿里云安全组规则已开放相应端口。
+### 步骤 4: 部署项目
 
-### 步骤 5: (可选) 配置域名和 HTTPS
+#### 4.1 安装 Git 并克隆代码
 
-#### 5.1 购买域名并配置 DNS
+```bash
+# 安装 Git
+sudo apt-get install -y git  # Ubuntu/Debian
+sudo yum install -y git      # CentOS/RHEL
 
-**在阿里云购买域名**:
+# 克隆项目代码
+git clone https://github.com/scut-pan/flask_shop_system.git
+cd flask_shop_system
+
+# 或者上传代码到服务器
+# scp -r /local/path/to/project root@your-server-ip:/root/flask_shop_system
+```
+
+#### 4.2 配置环境变量
+
+```bash
+# 复制并编辑配置文件
+cp .env.production .env
+nano .env
+```
+
+**必须修改的配置项:**
+
+```bash
+# 生成强密钥 (在本地或服务器运行)
+SECRET_KEY=你生成的密钥
+
+# MySQL 配置
+MYSQL_ROOT_PASSWORD=设置root密码(例如: Root@123456)
+MYSQL_PASSWORD=设置数据库密码(例如: Shop@2025)
+
+# 邮件配置 (可选)
+MAIL_USERNAME=你的邮箱@qq.com
+MAIL_PASSWORD=邮箱授权码
+```
+
+**生成 SECRET_KEY:**
+
+```bash
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+#### 4.3 创建必要的目录
+
+```bash
+mkdir -p nginx/ssl
+mkdir -p nginx/logs
+mkdir -p logs
+mkdir -p app/static/images/uploads
+```
+
+#### 4.4 启动服务
+
+```bash
+# 构建镜像并启动所有服务
+docker compose up -d --build
+
+# 查看服务状态
+docker compose ps
+
+# 查看日志
+docker compose logs -f
+```
+
+### 步骤 5: 初始化数据库
+
+**⚠️ 重要提示:**
+- 确保 `migrations` 目录存在并已提交到 Git 仓库
+- 如果 `migrations` 目录不存在,需要在本地先运行 `flask db init` 和 `flask db migrate`
+- 详见"故障排查 > 问题 8: 迁移文件缺失"
+
+```bash
+# 等待 MySQL 完全启动后(约 30 秒),运行数据库迁移
+docker compose exec web uv run flask db upgrade
+
+# 创建管理员账户
+docker compose exec web uv run python -c "
+from app import create_app
+from app.extensions import db
+from app.models import User
+from werkzeug.security import generate_password_hash
+
+app = create_app()
+app.app_context().push()
+
+admin = User(
+    username='admin',
+    email='admin@example.com',
+    password_hash=generate_password_hash('Admin@123'),
+    is_admin=True
+)
+db.session.add(admin)
+db.session.commit()
+print('管理员账户创建成功!')
+print('用户名: admin')
+print('密码: Admin@123')
+"
+```
+
+### 步骤 6: 访问应用
+
+在浏览器中访问:
+- HTTP: `http://your-server-ip` 或 `http://your-domain.com`
+- HTTPS: `https://your-domain.com` (如果配置了 SSL)
+
+**例如:** `http://8.138.112.249`
+
+使用以下账户登录:
+- 用户名: `admin`
+- 密码: `Admin@123`
+
+### 步骤 7: (可选) 配置域名和 HTTPS
+
+如果你想使用域名访问和HTTPS加密,可以按照以下步骤配置:
+
+#### 7.1 购买域名并配置 DNS
 
 1. **购买域名**
    - 登录阿里云控制台
