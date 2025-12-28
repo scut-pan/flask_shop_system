@@ -122,7 +122,7 @@ uv run python main.py
 
 管理员账户:
 - 用户名: `admin`
-- 密码: `Admin@123`
+- 密码: `admin123`
 
 ## 项目结构
 
