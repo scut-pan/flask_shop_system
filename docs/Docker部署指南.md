@@ -216,14 +216,14 @@ docker compose logs -f
 docker compose exec web uv run flask db upgrade
 
 # 创建管理员账户
-docker compose exec web uv run python -c "from app.extensions import db; from app.models import User; from werkzeug.security import generate_password_hash; admin = User(username='admin', email='admin@example.com', password_hash=generate_password_hash('Admin@123'), is_admin=True); db.session.add(admin); db.session.commit(); print('管理员账户创建成功!')"
+docker compose exec web uv run python -c "from app import create_app; from app.extensions import db; from app.models import User; from werkzeug.security import generate_password_hash; app = create_app(); app.app_context().push(); admin = User(username='admin', email='admin@example.com', password_hash=generate_password_hash('admin123'), is_admin=True); db.session.add(admin); db.session.commit(); print('管理员账户创建成功!')"
 ```
 
 **预期输出:**
 ```
 管理员账户创建成功!
 用户名: admin
-密码: Admin@123
+密码: admin123
 ```
 
 #### 步骤 6: 访问应用
@@ -232,7 +232,7 @@ docker compose exec web uv run python -c "from app.extensions import db; from ap
 
 使用以下账户登录:
 - 用户名: `admin`
-- 密码: `Admin@123`
+- 密码: `admin123`
 
 #### 常用命令
 
@@ -322,9 +322,13 @@ docker compose exec web uv run flask db upgrade
 
 # 创建管理员账户
 docker compose exec web uv run python -c "
+from app import create_app
 from app.extensions import db
 from app.models import User
 from werkzeug.security import generate_password_hash
+
+app = create_app()
+app.app_context().push()
 
 admin = User(
     username='admin',
@@ -346,16 +350,74 @@ print('密码: Admin@123')
 
 ---
 
-## 云服务器部署
+## 阿里云服务器部署
 
-### 步骤 1: 连接到服务器
+### 步骤 0: 购买和配置阿里云 ECS 实例
+
+在开始部署之前,你需要先在阿里云购买并配置 ECS 实例。
+
+#### 0.1 购买 ECS 实例
+
+1. **登录阿里云控制台**
+   - 访问 [阿里云官网](https://www.aliyun.com/)
+   - 登录你的阿里云账号
+
+2. **创建 ECS 实例**
+   - 进入「云服务器 ECS」控制台
+   - 点击「创建实例」
+   - 选择以下配置:
+     - **付费模式**: 按量付费或包年包月(测试阶段推荐按量付费)
+     - **地域**: 选择离你最近的地域(如华东、华北等)
+     - **实例规格**: 推荐 2 核 4GB(如 `ecs.t6-c1m2.large` 或更高配置)
+     - **镜像**: 选择 Ubuntu 20.04/22.04 或 CentOS 7/8
+     - **存储**: 40GB 或以上 SSD 云盘
+     - **网络带宽**: 选择「按使用流量付费」或「按固定带宽」
+
+3. **设置安全组规则**
+   - 在创建实例时,配置安全组规则,开放以下端口:
+     - **端口 22**: 用于 SSH 连接(限制你的 IP 地址访问)
+     - **端口 80**: 用于 HTTP 访问
+     - **端口 443**: 用于 HTTPS 访问(可选)
+
+4. **设置登录凭证**
+   - 推荐使用「密钥对」认证,更安全
+   - 或设置强密码(包含大小写字母、数字和特殊字符)
+
+5. **购买并启动实例**
+   - 确认订单并支付
+   - 等待实例创建完成(通常 1-3 分钟)
+   - 在 ECS 实例列表中查看实例的**公网 IP 地址**
+
+#### 0.2 验证 ECS 实例
 
 ```bash
-# 使用 SSH 连接到服务器
+# 在本地终端测试连接(将 your-server-ip 替换为你的 ECS 公网 IP)
+ping your-server-ip
+
+# 尝试 SSH 连接(使用密码或密钥)
+ssh root@your-server-ip
+# 或使用密钥:
+# ssh -i /path/to/key.pem root@your-server-ip
+```
+
+### 步骤 1: 连接到阿里云 ECS 服务器
+
+```bash
+# 使用 SSH 连接到阿里云 ECS 服务器
+# 将 your-server-ip 替换为你的 ECS 实例公网 IP
 ssh root@your-server-ip
 
-# 或使用密钥
+# 如果使用密钥对认证:
 ssh -i /path/to/key.pem root@your-server-ip
+
+# Windows 用户可以使用 PowerShell 或其他 SSH 客户端
+# 例如: ssh root@your-server-ip
+```
+
+**登录成功后,你将看到类似以下的提示符:**
+```
+Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-162-generic x86_64)
+root@iZj6cxxxxxxZ:~#
 ```
 
 ### 步骤 2: 安装 Docker
@@ -384,30 +446,92 @@ nano .env
 docker compose up -d --build
 ```
 
-### 步骤 4: 配置防火墙
+### 步骤 4: 配置阿里云安全组
+
+在阿里云上部署应用,**必须配置安全组规则**才能让外部访问你的服务。
+
+#### 4.1 通过阿里云控制台配置安全组(推荐)
+
+1. **登录阿里云 ECS 控制台**
+   - 进入「云服务器 ECS」→「实例」
+
+2. **找到你的 ECS 实例**
+   - 在实例列表中,点击实例 ID 进入详情页
+
+3. **配置安全组规则**
+   - 点击「安全组」标签页
+   - 点击「配置规则」
+   - 点击「手动添加」或「快速添加」
+
+4. **添加以下入方向规则**:
+
+   | 授权策略 | 协议类型 | 端口范围 | 授权对象 | 描述 |
+   |---------|---------|---------|---------|------|
+   | 允许 | TCP | 22/22 | 0.0.0.0/0 或你的 IP | SSH 远程连接 |
+   | 允许 | TCP | 80/80 | 0.0.0.0/0 | HTTP 访问 |
+   | 允许 | TCP | 443/443 | 0.0.0.0/0 | HTTPS 访问 |
+
+   **安全建议**:
+   - 对于 SSH 端口(22),建议限制为你的 IP 地址(可以在本地搜索「我的 IP」获取)
+   - 如果不需要 SSH 访问,可以临时开放,部署完成后关闭
+
+5. **保存规则**
+   - 点击「确定」保存配置
+
+#### 4.2 服务器内部防火墙配置(可选)
+
+阿里云安全组已经提供了足够的防护,服务器内部防火墙可以不配置。如果你想额外配置,可以使用以下命令:
 
 ```bash
 # Ubuntu/Debian (UFW)
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
+sudo ufw allow 22/tcp    # 允许 SSH
 sudo ufw enable
 
 # CentOS/RHEL (firewalld)
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --permanent --add-service=ssh
 sudo firewall-cmd --reload
 ```
+
+**注意**: 如果配置了服务器内部防火墙,同时也要确保阿里云安全组规则已开放相应端口。
 
 ### 步骤 5: (可选) 配置域名和 HTTPS
 
 #### 5.1 购买域名并配置 DNS
 
-购买域名后,在域名注册商处添加 A 记录:
-```
-类型: A
-主机记录: @
-记录值: 你的服务器公网IP
-```
+**在阿里云购买域名**:
+
+1. **购买域名**
+   - 登录阿里云控制台
+   - 进入「域名注册」页面
+   - 搜索并购买你想要的域名(如 `example.com`)
+
+2. **配置域名解析**
+   - 进入「云解析 DNS」控制台
+   - 找到你购买的域名,点击「解析设置」
+   - 添加以下记录:
+
+   | 记录类型 | 主机记录 | 记录值 | TTL |
+   |---------|---------|--------|-----|
+   | A | @ | 你的 ECS 公网 IP | 600 |
+   | A | www | 你的 ECS 公网 IP | 600 |
+
+   **说明**:
+   - `@` 表示主域名(如 `example.com`)
+   - `www` 表示 www 子域名(如 `www.example.com`)
+   - TTL 表示缓存时间,600 秒即可
+
+3. **验证解析**
+   - 等待 5-10 分钟后,在本地终端测试:
+   ```bash
+   # 检查域名是否解析成功
+   nslookup your-domain.com
+   # 或
+   ping your-domain.com
+   ```
 
 #### 5.2 修改 Nginx 配置
 
@@ -421,20 +545,98 @@ server {
 }
 ```
 
-#### 5.3 申请 SSL 证书 (使用 Let's Encrypt)
+#### 5.3 申请 SSL 证书
+
+**方案一: 使用阿里云免费 SSL 证书(推荐)**
+
+阿里云为每个实名认证账号提供 20 个免费 DV SSL 证书。
+
+1. **申请免费证书**
+   - 登录阿里云控制台
+   - 搜索「SSL 证书」或进入「数字证书管理服务」
+   - 点击「免费证书」→「申请证书」
+   - 填写域名信息:
+     - 证书类型: DV(域名验证)
+     - 域名: `your-domain.com` 或 `*.your-domain.com`(通配符证书)
+   - 提交申请
+
+2. **域名验证**
+   - 选择「DNS 验证」方式
+   - 阿里云会自动添加 DNS 验证记录
+   - 等待几分钟,证书自动签发
+
+3. **下载证书**
+   - 证书签发后,点击「下载」
+   - 下载 Nginx 格式的证书
+   - 解压后得到两个文件:
+     - `your-domain.com.pem`(证书文件)
+     - `your-domain.com.key`(私钥文件)
+
+4. **上传证书到服务器**
+   ```bash
+   # 在本地终端执行,将证书上传到服务器
+   scp /path/to/your-domain.com.pem root@your-server-ip:/root/flask_shop_system/nginx/ssl/cert.pem
+   scp /path/to/your-domain.com.key root@your-server-ip:/root/flask_shop_system/nginx/ssl/key.pem
+   ```
+
+5. **修改 Nginx 配置启用 HTTPS**
+   - 编辑 `nginx/conf.d/flask_shop.conf`
+   - 取消 HTTPS 配置的注释,或添加以下内容:
+
+   ```nginx
+   server {
+       listen 443 ssl;
+       server_name your-domain.com;
+
+       ssl_certificate /etc/nginx/ssl/cert.pem;
+       ssl_certificate_key /etc/nginx/ssl/key.pem;
+
+       ssl_protocols TLSv1.2 TLSv1.3;
+       ssl_ciphers HIGH:!aNULL:!MD5;
+       ssl_prefer_server_ciphers on;
+
+       # ... 其他配置
+   }
+
+   # HTTP 自动跳转 HTTPS
+   server {
+       listen 80;
+       server_name your-domain.com;
+       return 301 https://$server_name$request_uri;
+   }
+   ```
+
+6. **重启 Nginx 容器**
+   ```bash
+   docker compose restart nginx
+   ```
+
+7. **验证 HTTPS**
+   - 在浏览器访问 `https://your-domain.com`
+   - 查看浏览器地址栏的锁形图标
+
+**方案二: 使用 Let's Encrypt 免费证书**
 
 ```bash
 # 安装 Certbot
 sudo apt-get install -y certbot python3-certbot-nginx
 
-# 申请证书并自动配置 Nginx
-sudo certbot --nginx -d your-domain.com
+# 申请证书
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
 
-# 重启 Nginx 容器
+# 证书文件位置:
+# /etc/letsencrypt/live/your-domain.com/fullchain.pem
+# /etc/letsencrypt/live/your-domain.com/privkey.pem
+
+# 将证书复制到项目目录
+sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem /root/flask_shop_system/nginx/ssl/cert.pem
+sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem /root/flask_shop_system/nginx/ssl/key.pem
+
+# 修改 Nginx 配置后重启容器
 docker compose restart nginx
 ```
 
-或者使用 OpenSSL 生成自签名证书(仅用于测试):
+**方案三: 使用自签名证书(仅用于测试)**
 
 ```bash
 # 创建 SSL 目录
@@ -449,6 +651,8 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 # 修改 nginx/conf.d/flask_shop.conf,启用 HTTPS 配置
 ```
 
+**注意**: 自签名证书会导致浏览器显示「不安全」警告,仅用于开发测试。
+
 ### 步骤 6: 初始化数据库
 
 ```bash
@@ -457,9 +661,13 @@ docker compose exec web uv run flask db upgrade
 
 # 创建管理员账户
 docker compose exec web uv run python -c "
+from app import create_app
 from app.extensions import db
 from app.models import User
 from werkzeug.security import generate_password_hash
+
+app = create_app()
+app.app_context().push()
 
 admin = User(
     username='admin',
