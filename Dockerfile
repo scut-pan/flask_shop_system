@@ -20,8 +20,9 @@ RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debia
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 uv 包管理器
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# 安装 uv 包管理器 (使用官方安装脚本)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.cargo/bin/uv /usr/local/bin/uv
 
 # 复制项目文件
 COPY pyproject.toml uv.lock ./
